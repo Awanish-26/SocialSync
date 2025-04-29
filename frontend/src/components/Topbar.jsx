@@ -1,37 +1,47 @@
-import { useEffect, useState } from "react";
-import user_image from '../assets/profile.png'; // Placeholder image for user profile
+import { useEffect, useState, useContext } from "react";
+import { SidebarContext } from "../components/context/SidebarContext"
+import { FaSearch } from "react-icons/fa";
+import { IoMdNotificationsOutline } from "react-icons/io";
+import user_image from "../assets/profile.png";
 function Topbar() {
-    const [userName, setUserName] = useState("");
+  const [userName, setUserName] = useState("");
 
-    useEffect(() => {
-      const name = localStorage.getItem("name");
-      setUserName(name || "User");
-    }, []);
+  const {isCollapsed, setIsCollapsed} = useContext(SidebarContext);
 
-    return (
-      <header className="flex items-center justify-between bg-white shadow px-6 py-4">
+  useEffect(() => {
+    const name = localStorage.getItem("name");
+    setUserName(name || "User");
+  }, []);
+
+  return (
+    <header className="flex items-center justify-between bg-white shadow px-6 py-4">
+      {isCollapsed && (
+        <div>
+          <h2 className="text-blue-700 text-2xl font-bold select-none">SocialSync</h2>
+        </div>
+      )}
+      <div className="relative w-1/2">
+        <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         <input
           type="text"
           placeholder="Search profiles or metrics..."
-          className="px-4 py-2 border rounded-lg w-1/2"
+          className="pl-10 pr-4 py-2 border rounded-lg w-full"
         />
-        <div className="flex items-center space-x-4">
-          <button className="text-gray-600 hover:text-blue-500">
-            🔔
-          </button>
-          <div className="flex items-center space-x-2">
-            <img
-              src={user_image}
-              alt="User"
-              className="rounded-full"
-              style={{ width: "24px", height: "24px" }}
-            />
-            <span>{userName}</span>
-          </div>
+      </div>
+      <div className="flex items-center space-x-4">
+        <IoMdNotificationsOutline className="text-gray-600 h-6 w-6"/>
+        <div className="flex items-center space-x-2">
+          <img
+            src={user_image}
+            alt="User"
+            className="rounded-full"
+            style={{ width: "24px", height: "24px" }}
+          />
+          <button>{userName}</button>
         </div>
-      </header>
-    );
-  }
-  
-  export default Topbar;
-  
+      </div>
+    </header>
+  );
+}
+
+export default Topbar;
