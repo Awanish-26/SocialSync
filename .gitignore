@@ -1,0 +1,28 @@
+# .gitignore
+
+# Python / Django
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+db.sqlite3
+.DS_Store
+
+# Django specific
+backend/staticfiles/
+backend/media/
+
+# VS Code settings
+.vscode/
+
+# React / Node
+node_modules/
+dist/
+frontend/.env
+*.log
+
+# General
+*.env
+.env.*
