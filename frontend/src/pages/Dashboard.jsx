@@ -1,38 +1,46 @@
+import { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
-import ConnectInstagramCard from "../components/cards/ConnectInstagramCard";
-import ConnectFacebookCard from "../components/cards/ConnectFacebookCard";
-import ConnectTwitterCard from "../components/cards/ConnectTwitterCard";
+import Analytics from "../components/Analytics";
+import Audience from "../components/Audience";
+import Settings from "../components/Settings";
+import Instagram from "../components/Instagram";
+import Facebook from "../components/Facebook";
+import Twitter from "../components/Twitter";
 
 function Dashboard() {
-  const handleConnectInstagram = () => {
-    console.log("User wants to connect Instagram");
-  };
+  const [activeComponent, setActiveComponent] = useState("Dashboard");
 
-  const handleConnectFacebook = () => {
-    console.log("User wants to connect Facebook");
-  };
-
-  const handleConnectTwitter = () => {
-    console.log("User wants to connect X (Twitter)");
+  const renderComponent = () => {
+    switch (activeComponent) {
+      case "Analytics":
+        return <Analytics />;
+      case "Audience":
+        return <Audience />;
+      case "Settings":
+        return <Settings />;
+      case "Instagram":
+        return <Instagram />;
+      case "Facebook":
+        return <Facebook />;
+      case "Twitter":
+        return <Twitter />;
+      default:
+        return <h1>Welcome to the Dashboard</h1>;
+    }
   };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <Sidebar />
+      <Sidebar setActiveComponent={setActiveComponent} />
 
       {/* Main Content */}
       <div className="flex flex-col flex-1">
-        {/* Topbar */}
         <Topbar />
 
         {/* Page Content */}
         <main className="p-6">
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <ConnectInstagramCard onConnect={handleConnectInstagram} />
-            <ConnectFacebookCard onConnect={handleConnectFacebook} />
-            <ConnectTwitterCard onConnect={handleConnectTwitter} />
-          </div>
+          <div className="">{renderComponent()}</div>
         </main>
       </div>
     </div>

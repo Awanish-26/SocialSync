@@ -19,7 +19,7 @@ function Navbar() {
 
   return (
     <nav className="flex justify-between items-center p-6 bg-white shadow-md sticky top-0 z-50">
-      <Link to="/" className="text-2xl font-bold text-blue-600">SocialSync 📈</Link>
+      <Link to="/" className="text-2xl font-bold text-blue-600">SocialSync</Link>
 
       <div className="flex gap-4">
         {isAuthenticated ? (

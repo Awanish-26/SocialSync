@@ -41,42 +41,57 @@ function Landing() {
       </section>
 
       {/* About Section */}
-      <section className="py-12 px-6 bg-gray-50 text-center">
-        <h3 className="text-3xl font-bold mb-4 text-gray-800">About SocialPulse</h3>
-        <p className="max-w-2xl mx-auto text-gray-600">
-          SocialPulse is your all-in-one tool to monitor social media growth. Whether you're an influencer, a business, or just curious, track your stats easily across platforms like Instagram, YouTube, and X!
-        </p>
-      </section>
+        <section className="py-12 px-6 bg-gray-50 text-center">
+          <h3 className="text-3xl font-bold mb-4 text-gray-800">About SocialPulse</h3>
+          <p className="max-w-2xl mx-auto text-gray-600">
+            SocialPulse is your all-in-one tool to monitor social media growth. Whether you're an influencer, a business, or just curious, track your stats easily across platforms like Instagram, YouTube, and X!
+          </p>
+        </section>
 
-      {/* Features Section */}
-      <section className="py-12 px-6 bg-gray-100 text-center">
-        <h3 className="text-3xl font-bold mb-10 text-gray-800">Features</h3>
-        
-        <div className="flex flex-col md:flex-row gap-8 justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-md w-full md:w-1/3">
-            <h4 className="text-xl font-bold text-indigo-600 mb-2">Multi-Platform Support</h4>
-            <p className="text-gray-600">
-              Connect your Instagram, YouTube, and X accounts and view growth at one place.
-            </p>
-          </div>
+        {/* Features Section */}
+        <section className="py-12 px-6 bg-gray-100 text-center">
+          <h3 className="text-3xl font-bold mb-10 text-gray-800">Features</h3>
           
-          <div className="bg-white p-6 rounded-lg shadow-md w-full md:w-1/3">
-            <h4 className="text-xl font-bold text-teal-600 mb-2">Real-time Stats</h4>
-            <p className="text-gray-600">
-              Get live updates and growth analytics to stay ahead in your journey.
-            </p>
-          </div>
+          <div className="flex flex-col md:flex-row gap-8 justify-center">
+            <div className="bg-white p-6 rounded-lg shadow-md w-full md:w-1/3">
+          <img 
+            src="https://via.placeholder.com/150" 
+            alt="Multi-Platform Support" 
+            className="w-16 h-16 mx-auto mb-4"
+          />
+          <h4 className="text-xl font-bold text-indigo-600 mb-2">Multi-Platform Support</h4>
+          <p className="text-gray-600">
+            Connect your Instagram, YouTube, and X accounts and view growth at one place.
+          </p>
+            </div>
+            
+            <div className="bg-white p-6 rounded-lg shadow-md w-full md:w-1/3">
+          <img 
+            src="https://via.placeholder.com/150" 
+            alt="Real-time Stats" 
+            className="w-16 h-16 mx-auto mb-4"
+          />
+          <h4 className="text-xl font-bold text-teal-600 mb-2">Real-time Stats</h4>
+          <p className="text-gray-600">
+            Get live updates and growth analytics to stay ahead in your journey.
+          </p>
+            </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-md w-full md:w-1/3">
-            <h4 className="text-xl font-bold text-blue-600 mb-2">Beautiful Graphs</h4>
-            <p className="text-gray-600">
-              Visualize your follower growth, likes, views and much more with smooth graphs.
-            </p>
+            <div className="bg-white p-6 rounded-lg shadow-md w-full md:w-1/3">
+          <img 
+            src="https://via.placeholder.com/150" 
+            alt="Beautiful Graphs" 
+            className="w-16 h-16 mx-auto mb-4"
+          />
+          <h4 className="text-xl font-bold text-blue-600 mb-2">Beautiful Graphs</h4>
+          <p className="text-gray-600">
+            Visualize your follower growth, likes, views and much more with smooth graphs.
+          </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Footer */}
+        {/* Footer */}
       <footer className="bg-indigo-900 text-white text-center py-6 mt-10">
         <p>© 2025 SocialPulse. Made with ❤️ for creators.</p>
       </footer>

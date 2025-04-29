@@ -1,41 +1,12 @@
-// components/Sidebar.jsx
 import React, { useState } from 'react';
-import { Link,useNavigate } from 'react-router-dom';
 import { FaTachometerAlt, FaChartBar, FaUsers, FaCog, FaInstagram, FaFacebook, FaTwitter, FaBars } from 'react-icons/fa';
-import Settings from '../components/Settings';
-import Analytics from '../components/Analytics';
-import Audience from '../components/Audience';
-import Instagram from '../components/Instagram';
-import Facebook from '../components/Facebook';
-import Twitter from '../components/Twitter';
 
-const Sidebar = () => {
+
+const Sidebar = ({ setActiveComponent }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [activeComponent, setActiveComponent] = useState('Dashboard');
-  const navigate = useNavigate();
+
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
-  };
-
-  const renderComponent = () => {
-    switch (activeComponent) {
-      case 'Dashboard':
-        return ;
-      case 'Analytics':
-        return <Analytics />;
-      case 'Audience':
-        return <Audience />;
-      case 'Settings':
-        return <Settings />;
-      case 'Instagram':
-        return <Instagram />;
-      case 'Facebook':
-        return <Facebook />;
-      case 'Twitter':
-        return <Twitter />;
-      default:
-        return <Dashboard />;
-    }
   };
 
   return (
@@ -105,9 +76,6 @@ const Sidebar = () => {
             </li>
           </ul>
         </div>
-      </div>
-      <div className="flex-1 p-6 bg-gray-100">
-        {renderComponent()}
       </div>
     </div>
   );
