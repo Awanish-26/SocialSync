@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 import signIn_image from "../assets/undraw_sign-in.png";
+import { LuEye, LuEyeClosed } from "react-icons/lu";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -72,7 +73,7 @@ function Login() {
               <div className="relative">
                 <input  name="password"  type={showPassword ? "text" : "password"}  placeholder="Password"  value={formData.password}  onChange={handleChange}  required  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"/>
                 <button  type="button"  onClick={togglePasswordVisibility}  className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none">
-                  {showPassword ? "Hide" : "Show"}
+                  {showPassword ? <LuEyeClosed/> : <LuEye/>}
                 </button>
               </div>
               <p className="text-sm text-gray-600">

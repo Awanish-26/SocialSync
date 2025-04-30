@@ -1,19 +1,15 @@
-import React, { useState } from 'react';
-import { FaTachometerAlt, FaChartBar, FaUsers, FaCog, FaInstagram, FaFacebook, FaTwitter, FaBars ,FaYoutube } from 'react-icons/fa';
-
+import { useContext } from 'react';
+import { SidebarContext } from '../components/context/SidebarContext';
+import { FaTachometerAlt, FaChartBar, FaUsers, FaCog, FaInstagram, FaFacebook, FaTwitter, FaBars } from 'react-icons/fa';
 
 const Sidebar = ({ setActiveComponent }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
-  };
+  const { isCollapsed, toggleSidebar } = useContext(SidebarContext);
 
   return (
     <div className="flex">
       <div className={`min-h-screen ${isCollapsed ? 'w-16' : 'md:w-72'} bg-gray-800 text-white transition-all duration-300`}>
         <div className="p-6 flex justify-between items-center">
-          {!isCollapsed && <h2 className="text-2xl font-bold">SocialSync</h2>}
+          {!isCollapsed && <h2 className="text-2xl font-bold select-none">SocialSync</h2>}
           <button onClick={toggleSidebar} className="text-white focus:outline-none">
             <FaBars size={20} />
           </button>
