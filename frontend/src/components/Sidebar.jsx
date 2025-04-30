@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaTachometerAlt, FaChartBar, FaUsers, FaCog, FaInstagram, FaFacebook, FaTwitter, FaBars } from 'react-icons/fa';
+import { FaTachometerAlt, FaChartBar, FaUsers, FaCog, FaInstagram, FaFacebook, FaTwitter, FaBars ,FaYoutube } from 'react-icons/fa';
 
 
 const Sidebar = ({ setActiveComponent }) => {
@@ -74,6 +74,13 @@ const Sidebar = ({ setActiveComponent }) => {
               <FaTwitter className="mr-2 ml-2 text-blue-400" />
               {!isCollapsed && 'X (Twitter)'}
             </li>
+            <li
+              className="p-4 flex items-center hover:bg-gray-700 cursor-pointer"
+              onClick={() => setActiveComponent('Youtube')}
+              >
+              <FaYoutube className="mr-2 ml-2 text-red-500" />
+              {!isCollapsed && 'Youtube'}
+              </li>
           </ul>
         </div>
       </div>

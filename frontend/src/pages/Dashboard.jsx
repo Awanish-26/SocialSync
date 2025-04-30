@@ -7,6 +7,7 @@ import Settings from "../components/Settings";
 import Instagram from "../components/Instagram";
 import Facebook from "../components/Facebook";
 import Twitter from "../components/Twitter";
+import Youtube from "../components/Youtube";
 
 function Dashboard() {
   const [activeComponent, setActiveComponent] = useState("Dashboard");
@@ -25,6 +26,8 @@ function Dashboard() {
         return <Facebook />;
       case "Twitter":
         return <Twitter />;
+      case "Youtube":
+        return <Youtube />;
       default:
         return <h1>Welcome to the Dashboard</h1>;
     }

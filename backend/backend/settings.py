@@ -11,8 +11,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
-# Application definition
+***REMOVED***
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -65,6 +64,8 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://localhost:3000",
+    "http://localhost:8000",
 ]
 
 
