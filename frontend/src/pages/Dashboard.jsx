@@ -8,6 +8,7 @@ import Settings from "../components/Settings";
 import Instagram from "../components/Instagram";
 import Facebook from "../components/Facebook";
 import Twitter from "../components/Twitter";
+import Youtube from "../components/Youtube";
 import { mockProfiles, getProfileMetrics, getTimeSeriesData, generateRecommendations } from "../utils/mockData";
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -50,6 +51,8 @@ function Dashboard() {
         return <Facebook />;
       case "Twitter":
         return <Twitter />;
+      case "Youtube":
+        return <Youtube />;
       default:
         // Enhanced dashboard view as default
         return (

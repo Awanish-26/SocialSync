@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { SidebarContext } from '../components/context/SidebarContext';
-import { FaTachometerAlt, FaChartBar, FaUsers, FaCog, FaInstagram, FaFacebook, FaTwitter, FaBars } from 'react-icons/fa';
+import { FaTachometerAlt, FaChartBar, FaUsers, FaCog, FaInstagram, FaFacebook, FaTwitter, FaBars ,FaYoutube } from 'react-icons/fa';
 
 const Sidebar = ({ setActiveComponent }) => {
   const { isCollapsed, toggleSidebar } = useContext(SidebarContext);
@@ -74,6 +74,13 @@ const Sidebar = ({ setActiveComponent }) => {
               <FaTwitter className="mr-2 ml-2 text-blue-400" />
               <span className={`${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto ml-2'}`}>{!isCollapsed && 'X (Twitter)'}</span>
             </li>
+            <li
+              className="p-4 flex items-center hover:bg-gray-700 cursor-pointer"
+              onClick={() => setActiveComponent('Youtube')}
+              >
+              <FaYoutube className="mr-2 ml-2 text-red-500" />
+              {!isCollapsed && 'Youtube'}
+              </li>
           </ul>
         </div>
       </div>

@@ -1,7 +1,10 @@
+/* eslint-disable no-unused-vars */
 import { useEffect } from 'react';
 import { Link,useNavigate } from 'react-router-dom';
-import landing_image from '../assets/landing.png';
+import hero_image from '../assets/hero.svg';
 import Navbar from '../components/Navbar';
+import { motion } from 'framer-motion';
+import about_image from '../assets/about.svg';
 
 function Landing() {
   const navigate = useNavigate();
@@ -9,7 +12,7 @@ function Landing() {
   useEffect(() => {
     const token = localStorage.getItem('access');
     if (token) {
-      navigate('/dashboard'); // Redirect to dashboard if token exists
+      navigate('/dashboard');
     }
   }, [navigate]);
   return (
@@ -18,44 +21,61 @@ function Landing() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="flex flex-col md:flex-row items-center justify-center text-center md:text-left flex-1 bg-gradient-to-r from-indigo-100 via-teal-100 to-blue-100 p-8">
-        <div className="md:w-1/2 p-6">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-800">
-            Track Your Social Media Growth
-          </h2>
-          <p className="text-lg text-gray-700 mb-6">
-            Analyze your Instagram, YouTube, X and grow smarter every day.
-          </p>
-          <Link to="/signup" className="inline-block px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold text-lg">
-            Get Started
-          </Link>
-        </div>
+        <section className="flex flex-col md:flex-row items-center justify-center text-center md:text-left flex-1 bg-gradient-to-r from-indigo-100 via-teal-100 to-blue-100 p-8">
+          <div className="md:w-1/2 p-6">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-800">
+          Track Your Social Media Growth
+            </h2>
+            <p className="text-lg text-gray-700 mb-6">
+          Analyze your Instagram, YouTube, X and grow smarter every day.
+            </p>
+            <Link to="/signup" className="inline-block px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold text-lg">
+          Get Started
+            </Link>
+          </div>
 
-        <div className="md:w-1/2 p-6">
-          <img 
-            src={landing_image}
-            alt="Social media analysis" 
-            className="w-full"
-          />
-        </div>
-      </section>
-
-      {/* About Section */}
-        <section className="py-12 px-6 bg-gray-50 text-center">
-          <h3 className="text-3xl font-bold mb-4 text-gray-800">About SocialPulse</h3>
-          <p className="max-w-2xl mx-auto text-gray-600">
-            SocialPulse is your all-in-one tool to monitor social media growth. Whether you're an influencer, a business, or just curious, track your stats easily across platforms like Instagram, YouTube, and X!
-          </p>
+          <div   className="md:w-1/2 p-6">
+            <img  src={hero_image}  alt="Social media analysis" className="w-4/5 float-end"/>
+          </div>
         </section>
 
-        {/* Features Section */}
+        {/* About Section */}
+      <section className="bg-white py-20">
+      <div className="container mx-auto px-4 flex flex-col-reverse md:flex-row items-center">
+        {/* Text Content */}
+        <motion.div 
+          className="w-full md:w-1/2 text-center md:text-left"
+          initial={{ opacity: 0, x: -50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+        >
+          <h2 className="text-4xl font-bold mb-4 text-indigo-700">About Us</h2>
+          <p className="text-gray-700 mb-4 leading-relaxed">
+            We're on a mission to build beautiful, responsive, and accessible web applications that empower users and solve real-world problems.
+          </p>
+          <p className="text-gray-600">
+            Our team is passionate about blending design with functionality. We use modern tools like React, Tailwind CSS, and animations to deliver engaging user experiences.
+          </p>
+        </motion.div>
+
+          <img
+            src={about_image} // Replace with your own from undraw or storyset
+            alt="Teamwork illustration"
+            className="w-full md:w-1/2 mb-10 md:mb-0"
+ 
+          />
+              </div>
+            </section>
+
+          {/* Features Section */}
         <section className="py-12 px-6 bg-gray-100 text-center">
           <h3 className="text-3xl font-bold mb-10 text-gray-800">Features</h3>
           
           <div className="flex flex-col md:flex-row gap-8 justify-center">
             <div className="bg-white p-6 rounded-lg shadow-md w-full md:w-1/3">
           <img 
-            src="https://via.placeholder.com/150" 
+            src="https://img.icons8.com/?size=100&id=3473&format=png&color=000000" 
             alt="Multi-Platform Support" 
             className="w-16 h-16 mx-auto mb-4"
           />
@@ -67,7 +87,7 @@ function Landing() {
             
             <div className="bg-white p-6 rounded-lg shadow-md w-full md:w-1/3">
           <img 
-            src="https://via.placeholder.com/150" 
+            src="https://img.icons8.com/?size=100&id=84306&format=png&color=000000" 
             alt="Real-time Stats" 
             className="w-16 h-16 mx-auto mb-4"
           />
@@ -79,7 +99,7 @@ function Landing() {
 
             <div className="bg-white p-6 rounded-lg shadow-md w-full md:w-1/3">
           <img 
-            src="https://via.placeholder.com/150" 
+            src="https://img.icons8.com/?size=100&id=102554&format=png&color=000000" 
             alt="Beautiful Graphs" 
             className="w-16 h-16 mx-auto mb-4"
           />
