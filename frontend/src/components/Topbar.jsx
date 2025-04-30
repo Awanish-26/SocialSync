@@ -3,7 +3,8 @@ import { SidebarContext } from "../components/context/SidebarContext"
 import { FaSearch } from "react-icons/fa";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import user_image from "../assets/profile.png";
-function Topbar() {
+
+function Topbar({ topbarVisible }) {
   const [userName, setUserName] = useState("");
 
   const {isCollapsed, setIsCollapsed} = useContext(SidebarContext);
@@ -14,7 +15,10 @@ function Topbar() {
   }, []);
 
   return (
-    <header className="flex items-center justify-between bg-white shadow px-6 py-4">
+    <header
+      className={`fixed top-0 z-50 flex items-center justify-between bg-white/80 backdrop-blur-md shadow px-6 py-4 ${isCollapsed ? 'left-16 w-[calc(100%-4rem)]' : 'md:left-72 md:w-[calc(100%-18rem)]'} ${topbarVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}
+      style={isCollapsed ? { left: '4rem', width: 'calc(100% - 4rem)' } : { left: '18rem', width: 'calc(100% - 18rem)' }}
+    >
       {isCollapsed && (
         <div>
           <h2 className="text-blue-700 text-2xl font-bold select-none">SocialSync</h2>
