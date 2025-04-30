@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { SidebarContext } from '../components/context/SidebarContext';
-import { FaTachometerAlt, FaChartBar, FaUsers, FaCog, FaInstagram, FaFacebook, FaTwitter, FaBars } from 'react-icons/fa';
+import { FaTachometerAlt, FaChartBar, FaUsers, FaCog, FaInstagram, FaFacebook, FaTwitter, FaBars ,FaYoutube } from 'react-icons/fa';
 
 const Sidebar = ({ setActiveComponent }) => {
   const { isCollapsed, toggleSidebar } = useContext(SidebarContext);
