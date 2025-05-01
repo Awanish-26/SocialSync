@@ -7,9 +7,13 @@ const Sidebar = ({ setActiveComponent }) => {
 
   return (
     <div className="flex">
-      <div className={`min-h-screen ${isCollapsed ? 'w-16' : 'md:w-72'} bg-gray-800 text-white transition-all duration-300`}>
+      <div className={`fixed top-0 left-0 h-screen ${isCollapsed ? 'w-16' : 'w-72'} bg-gray-800 text-white z-40 overflow-hidden`}>
         <div className="p-6 flex justify-between items-center">
-          {!isCollapsed && <h2 className="text-2xl font-bold select-none">SocialSync</h2>}
+          {/* Logo fades in/out */}
+          <div className={`${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            {!isCollapsed && <h2 className="text-2xl font-bold select-none">SocialSync</h2>}
+          </div>
+          {/* Toggle button always visible */}
           <button onClick={toggleSidebar} className="text-white focus:outline-none">
             <FaBars size={20} />
           </button>
@@ -21,54 +25,54 @@ const Sidebar = ({ setActiveComponent }) => {
               onClick={() => setActiveComponent('Dashboard')}
             >
               <FaTachometerAlt className="mr-2 ml-2" />
-              {!isCollapsed && 'Dashboard'}
+              <span className={`${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto ml-2'}`}>{!isCollapsed && 'Dashboard'}</span>
             </li>
             <li
               className="p-4 flex items-center hover:bg-gray-700 cursor-pointer"
               onClick={() => setActiveComponent('Analytics')}
             >
               <FaChartBar className="mr-2 ml-2" />
-              {!isCollapsed && 'Analytics'}
+              <span className={`${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto ml-2'}`}>{!isCollapsed && 'Analytics'}</span>
             </li>
             <li
               className="p-4 flex items-center hover:bg-gray-700 cursor-pointer"
               onClick={() => setActiveComponent('Audience')}
             >
               <FaUsers className="mr-2 ml-2" />
-              {!isCollapsed && 'Audience'}
+              <span className={`${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto ml-2'}`}>{!isCollapsed && 'Audience'}</span>
             </li>
             <li
               className="p-4 flex items-center hover:bg-gray-700 cursor-pointer"
               onClick={() => setActiveComponent('Settings')}
             >
               <FaCog className="mr-2 ml-2" />
-              {!isCollapsed && 'Settings'}
+              <span className={`${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto ml-2'}`}>{!isCollapsed && 'Settings'}</span>
             </li>
           </ul>
         </nav>
         <div className="mt-10">
-          {!isCollapsed && <h3 className="px-4 text-lg font-semibold">Connect Social Profiles</h3>}
+          <h3 className={`px-4 text-lg font-semibold ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>Connect Social Profiles</h3>
           <ul className="mt-4">
             <li
               className="p-4 flex items-center hover:bg-gray-700 cursor-pointer"
               onClick={() => setActiveComponent('Instagram')}
             >
               <FaInstagram className="mr-2 ml-2 text-pink-500" />
-              {!isCollapsed && 'Instagram'}
+              <span className={`${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto ml-2'}`}>{!isCollapsed && 'Instagram'}</span>
             </li>
             <li
               className="p-4 flex items-center hover:bg-gray-700 cursor-pointer"
               onClick={() => setActiveComponent('Facebook')}
             >
               <FaFacebook className="mr-2 ml-2 text-blue-500" />
-              {!isCollapsed && 'Facebook'}
+              <span className={`${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto ml-2'}`}>{!isCollapsed && 'Facebook'}</span>
             </li>
             <li
               className="p-4 flex items-center hover:bg-gray-700 cursor-pointer"
               onClick={() => setActiveComponent('Twitter')}
             >
               <FaTwitter className="mr-2 ml-2 text-blue-400" />
-              {!isCollapsed && 'X (Twitter)'}
+              <span className={`${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto ml-2'}`}>{!isCollapsed && 'X (Twitter)'}</span>
             </li>
             <li
               className="p-4 flex items-center hover:bg-gray-700 cursor-pointer"
