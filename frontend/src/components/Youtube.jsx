@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import ConnectYoutube from "./cards/ConnectYoutubeCard";
-import YoutubeInsights from "./insights/YoutubeInsights"; // Create this component
+import YoutubeInsights from "./insights/YoutubeInsights";
+import apiClient from "../utils/apiClient";
 
 function Youtube() {
   const [isConnected, setIsConnected] = useState(false);
@@ -10,16 +10,13 @@ function Youtube() {
 
   useEffect(() => {
     const fetchStatus = async () => {
-      const token = localStorage.getItem("access");
       try {
-        const res = await axios.get("http://localhost:8000/api/youtube/status/", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (res.data.connected) {
+        const res = await apiClient.get("/youtube/status/");
+        if (res.data && res.data.connected) {
           setIsConnected(true);
           setStats(res.data);
+        } else {
+          setIsConnected(false);
         }
       } catch (err) {
         console.error("Error checking YouTube connection", err);
@@ -39,7 +36,7 @@ function Youtube() {
           <YoutubeInsights stats={stats} />
         ) : (
           <div className="flex justify-center items-center">
-          <ConnectYoutube />
+            <ConnectYoutube />
           </div>
         )}
       </div>

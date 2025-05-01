@@ -146,3 +146,18 @@ def get_youtube_stats(request):
         for stat in stats
     ]
     return Response(data)
+
+
+# Delete the YouTube account
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def disconnect_youtube(request):
+    try:
+        account = SocialAccount.objects.get(
+            user=request.user, platform="youtube")
+        account.delete()  # Delete the YouTube account record
+        return Response({"message": "YouTube account disconnected successfully."})
+    except SocialAccount.DoesNotExist:
+        return Response({"error": "YouTube account not found."}, status=404)
+    except Exception as e:
+        return Response({"error": str(e)}, status=400)

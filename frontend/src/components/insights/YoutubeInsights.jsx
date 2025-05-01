@@ -1,25 +1,19 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useEffect, useState } from "react";
-import { FaUsers, FaEye, FaVideo ,FaRedo } from "react-icons/fa";
-import axios from "axios";
+import { FaUsers, FaEye, FaVideo, FaRedo } from "react-icons/fa";
+import apiClient from "../../utils/apiClient"; // Adjust the import path as necessary
 
 function YoutubeInsights({ stats }) {
   const [data, setData] = useState([]);
 
   const fetchStats = async () => {
-    const token = localStorage.getItem("access");
-    const res = await axios.get("http://localhost:8000/api/youtube/stats/", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await apiClient.get("/youtube/stats/");
     setData(res.data);
   };
 
   const refreshStats = async () => {
-    const token = localStorage.getItem("access");
     try {
-      await axios.post("http://localhost:8000/api/youtube/refresh/", {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await apiClient.post("/youtube/refresh/");
       fetchStats();
     } catch (err) {
       console.error("Error refreshing stats:", err);
@@ -32,7 +26,7 @@ function YoutubeInsights({ stats }) {
 
   return (
     <div className="bg-white shadow p-6 rounded relative">
-      <h2 className="text-2xl font-bold text-gray-800">{stats.title}</h2>
+      <h2 className="text-2xl font-bold text-red-400 mb-4">{stats.title}</h2>
       <div className="grid grid-cols-4 gap-4">
         <div className="flex items-center space-x-4 p-4 bg-gray-100 rounded shadow">
           <FaUsers className="text-blue-500 text-2xl" />
@@ -56,7 +50,7 @@ function YoutubeInsights({ stats }) {
           </div>
         </div>
         <div className="flex items-center relative">
-          <button  onClick={refreshStats}  className=" absolute right-0 top-0 flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+          <button onClick={refreshStats} className=" absolute right-0 top-0 flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
             <FaRedo className="text-white text-sm mr-2" />
             Refresh Stats
           </button>
