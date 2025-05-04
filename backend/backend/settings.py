@@ -12,6 +12,15 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 ***REMOVED***
+***REMOVED***
+***REMOVED***
+***REMOVED***
+TWITTER_***REMOVED***
+***REMOVED*** = "9TlB7Kf98aM9kdN3LJRFd2cNb5oQZbsyTBjSIdLTwpI2nB23Zu"
+# ***REMOVED***
+***REMOVED***
+***REMOVED***
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',

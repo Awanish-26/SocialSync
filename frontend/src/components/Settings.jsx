@@ -6,15 +6,11 @@ import { MdPalette } from 'react-icons/md';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 
-const Settings = ({ user }) => {
-  const [userName, setUserName] = useState("");
+const Settings = () => {
+  const name = localStorage.getItem("name");
   const [isYouTubeConnected, setIsYouTubeConnected] = useState(false);
+  const [isTwitterConnected, setIsTwitterConnected] = useState(false);
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('profile');
-
-  const fallbackUser = { name: 'User', email: '' };
-  const currentUser = user || fallbackUser;
-
   const tabs = [
     { id: 'profile', name: 'Profile', icon: <FiUser className="w-5 h-5" /> },
     { id: 'notifications', name: 'Notifications', icon: <FiBell className="w-5 h-5" /> },
@@ -22,21 +18,29 @@ const Settings = ({ user }) => {
     { id: 'appearance', name: 'Appearance', icon: <MdPalette className="w-5 h-5" /> },
     { id: 'integrations', name: 'Integrations', icon: <FiGlobe className="w-5 h-5" /> },
   ];
+  const [activeTab, setActiveTab] = useState(tabs[0].id);
+  const currentUser = name || "";
+
+  const handleTabClick = (tabId) => {
+    setActiveTab(tabId); // Update the active tab
+  };
 
   useEffect(() => {
-    const name = localStorage.getItem("name");
-    setUserName(name || "User");
-    // Check if YouTube is connected
-    const fetchYouTubeStatus = async () => {
+    const fetchStatus = async () => {
       try {
         const res = await apiClient.get("/youtube/status/");
         setIsYouTubeConnected(res.data.connected);
       } catch (err) {
         console.error("Error fetching YouTube status:", err);
       }
+      try {
+        const res = await apiClient.get("/twitter/status/");
+        setIsTwitterConnected(res.data.connected);
+      } catch (err) {
+        console.error("Error fetching Twitter status:", err);
+      }
     };
-
-    fetchYouTubeStatus();
+    fetchStatus();
   }, []);
 
 
@@ -55,13 +59,43 @@ const Settings = ({ user }) => {
       alert("Failed to disconnect YouTube.");
     }
   };
+
+  const handleDisconnectTwitter = async () => {
+    try {
+      await apiClient.delete("/twitter/disconnect/");
+      alert("Twitter account disconnected successfully.");
+      setIsTwitterConnected(false); // Update state after disconnection
+    } catch (err) {
+      console.error("Error disconnecting Twitter:", err);
+      alert("Failed to disconnect Twitter.");
+    }
+  };
+
   return (
     <div className="settings-page" id="settings-page">
       <h1 className="text-2xl font-bold mb-4">Settings</h1>
       <div className="user-info mb-4">
-        <p className="text-lg">Welcome, {userName}!</p>
+        <p className="text-lg">Welcome, {name}!</p>
       </div>
 
+      {/* Tabs */}
+      <div className="tabs flex space-x-4 border-b mb-4">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => handleTabClick(tab.id)}
+            className={`px-4 py-2 text-sm font-medium ${activeTab === tab.id
+              ? 'border-b-2 border-blue-500 text-blue-500'
+              : 'text-gray-500 hover:text-blue-500'
+              }`}
+          >
+            <div className="flex items-center space-x-2">
+              {tab.icon}
+              <span>{tab.name}</span>
+            </div>
+          </button>
+        ))}
+      </div>
       <div className="flex-1 max-w-3xl">
         {activeTab === 'profile' && (
           <Card title="Profile Settings">
@@ -221,94 +255,57 @@ const Settings = ({ user }) => {
         )}
         {activeTab === 'integrations' && (
           <Card title="Platform Integrations">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center">
-                  <img
-                    src="https://images.pexels.com/photos/1092644/pexels-photo-1092644.jpeg?auto=compress&cs=tinysrgb&w=50"
-                    alt="Instagram"
-                    className="w-8 h-8 rounded"
-                  />
-                  <div className="ml-3">
-                    <h4 className="font-medium">Instagram</h4>
-                    <p className="text-sm text-gray-500">Connected</p>
+            <div className="Social-Media-Integration flex-1 max-w-3xl">
+              <div className="mt-4 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-200">
+                {[
+                  { name: 'Instagram', connected: false },
+                  { name: 'Twitter', connected: isTwitterConnected },
+                  { name: 'Facebook', connected: false },
+                  { name: 'YouTube', connected: isYouTubeConnected },
+                ].map((account) => (
+                  <div key={account.name} className="flex items-center justify-between p-4 bg-gray-50">
+                    <div className="flex items-center">
+                      <div className="ml-3">
+                        <h4 className="font-medium">{account.name}</h4>
+                        <p className="text-sm text-gray-500">
+                          {account.connected ? 'Connected' : 'Not connected'}
+                        </p>
+                      </div>
+                    </div>
+                    {account.name === 'YouTube' && account.connected ? (
+                      <button
+                        onClick={() => handleDisconnectYouTube()}
+                        className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+                      >
+                        Disconnect
+                      </button>
+                    ) : account.name === 'Twitter' && account.connected ? (
+                      <button
+                        onClick={() => handleDisconnectTwitter()}
+                        className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+                      >
+                        Disconnect
+                      </button>
+                    ) : (
+                      <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                        Connect
+                      </button>
+                    )}
                   </div>
-                </div>
-                <Button variant="outline" size="sm">Manage</Button>
+                ))}
               </div>
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center">
-                  <img
-                    src="https://images.pexels.com/photos/1092644/pexels-photo-1092644.jpeg?auto=compress&cs=tinysrgb&w=50"
-                    alt="YouTube"
-                    className="w-8 h-8 rounded"
-                  />
-                  <div className="ml-3">
-                    <h4 className="font-medium">YouTube</h4>
-                    <p className="text-sm text-gray-500">Not connected</p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm">Connect</Button>
-              </div>
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center">
-                  <img
-                    src="https://images.pexels.com/photos/1092644/pexels-photo-1092644.jpeg?auto=compress&cs=tinysrgb&w=50"
-                    alt="Twitter"
-                    className="w-8 h-8 rounded"
-                  />
-                  <div className="ml-3">
-                    <h4 className="font-medium">Twitter</h4>
-                    <p className="text-sm text-gray-500">Connected</p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm">Manage</Button>
+              <div className="logout-button my-4 ">
+                <p className="text-xl font-bold mt-8">Logout from the account</p>
+                <p className="text-sm text-gray-500 mb-2">You will be logged out from all devices</p>
+                <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                  Logout
+                </button>
               </div>
             </div>
           </Card>
         )}
       </div>
-      <div className="Social-Media-Integration flex-1 max-w-3xl">
-        <h2 className="text-xl font-bold mt-8">Social Profile Settings</h2>
-        <div className="mt-4 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-200">
-          {[
-            { name: 'Instagram', connected: false },
-            { name: 'Twitter', connected: false },
-            { name: 'Facebook', connected: false },
-            { name: 'YouTube', connected: isYouTubeConnected },
-          ].map((account) => (
-            <div key={account.name} className="flex items-center justify-between p-4 bg-gray-50">
-              <div className="flex items-center">
-                <div className="ml-3">
-                  <h4 className="font-medium">{account.name}</h4>
-                  <p className="text-sm text-gray-500">
-                    {account.connected ? 'Connected' : 'Not connected'}
-                  </p>
-                </div>
-              </div>
-              {account.name === 'YouTube' && account.connected ? (
-                <button
-                  onClick={handleDisconnectYouTube}
-                  className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
-                >
-                  Disconnect
-                </button>
-              ) : (
-                <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                  Connect
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="logout-button my-4 ">
-          <p className="text-xl font-bold mt-8">Logout from the account</p>
-          <p className="text-sm text-gray-500 mb-2">You will be logged out from all devices</p>
-          <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-            Logout
-          </button>
-        </div>
-      </div>
+
     </div>
   );
 };

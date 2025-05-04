@@ -30,16 +30,14 @@ function Youtube() {
   if (loading) return <div className="text-center py-10">Loading...</div>;
 
   return (
-    <div className="p-6">
-      <div className="w-full h-full ">
-        {isConnected ? (
-          <YoutubeInsights stats={stats} />
-        ) : (
-          <div className="flex justify-center items-center">
-            <ConnectYoutube />
-          </div>
-        )}
-      </div>
+    <div className="">
+      {isConnected ? (
+        <YoutubeInsights stats={stats} />
+      ) : (
+        <div className="flex justify-center items-center">
+          <ConnectYoutube />
+        </div>
+      )}
     </div>
   );
 }

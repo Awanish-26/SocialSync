@@ -21,7 +21,6 @@ function Dashboard() {
   const [activeComponent, setActiveComponent] = useState("Dashboard");
   const sidebarRef = useRef(null);
   const { isCollapsed } = useContext(SidebarContext);
-  const prevIsCollapsed = useRef(isCollapsed);
 
   // Use the first mock profile as the selected profile
   const selectedProfile = mockProfiles[0];
@@ -29,13 +28,10 @@ function Dashboard() {
   // Data fetching using mock utilities
   const metrics = getProfileMetrics(selectedProfile.id);
   const followersData = getTimeSeriesData(selectedProfile.id, 'followers');
-  const engagementData = getTimeSeriesData(selectedProfile.id, 'engagement') || 
-                        getTimeSeriesData(selectedProfile.id, 'likes') || 
-                        getTimeSeriesData(selectedProfile.id, 'views');
+  const engagementData = getTimeSeriesData(selectedProfile.id, 'engagement') ||
+    getTimeSeriesData(selectedProfile.id, 'likes') ||
+    getTimeSeriesData(selectedProfile.id, 'views');
   const recommendations = generateRecommendations(selectedProfile.id);
-
-  // Calculate marginLeft for main content
-  const mainContentMarginLeft = isCollapsed ? "6rem" : "20rem";
 
   const renderComponent = () => {
     switch (activeComponent) {
@@ -132,22 +128,14 @@ function Dashboard() {
         <Sidebar setActiveComponent={setActiveComponent} isCollapsed={isCollapsed} />
       </div>
       {/* Main Content */}
-      <div
-        className="flex flex-col flex-1"
-        style={{ marginLeft: mainContentMarginLeft }}
-      >
-        <Topbar topbarVisible={true} />
+      <div className={`flex flex-col flex-1 ml-16 ${isCollapsed ? 'ml-16' : 'ml-72'} transition-all duration-300 ease-in-out`}>
+        <Topbar />
         {/* Page Content */}
-        <main
-          className="p-6"
-          style={{
-            marginTop: '64px',
-          }}
-        >
+        <main className="p-6 mt-16">
           <div className="">{renderComponent()}</div>
         </main>
       </div>
-    </div>
+    </div >
   );
 }
 
