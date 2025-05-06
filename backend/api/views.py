@@ -1,16 +1,13 @@
-import instaloader
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .models import SocialAccount, YouTubeStats
+from .models import SocialAccount, YoutubeStats
 import requests
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework import status
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.views import TokenObtainPairView
-from django.utils import timezone
-from .models import InstagramCredential, InstagramStats
 import tweepy
 from .models import TwitterCredential, TwitterStats
 
@@ -63,7 +60,7 @@ def connect_youtube(request):
     snippet = data["snippet"]
     stats = data["statistics"]
 
-    # Create or update SocialAccount and YouTubeStats
+    # Create or update SocialAccount and YoutubeStats
     social_account, created = SocialAccount.objects.update_or_create(
         user=request.user,
         platform="youtube",
@@ -73,7 +70,7 @@ def connect_youtube(request):
         }
     )
 
-    YouTubeStats.objects.update_or_create(
+    YoutubeStats.objects.update_or_create(
         social_account=social_account,
         defaults={
             "title": snippet["title"],
@@ -83,7 +80,7 @@ def connect_youtube(request):
         }
     )
 
-    return Response({"message": "YouTube connected successfully"})
+    return Response({"message": "YouTube connected successfully"}, status=200)
 
 
 # Get YouTube connection status and latest stats
@@ -96,19 +93,23 @@ def get_youtube_status(request):
         if not account.connected:
             return Response({"connected": False})
 
-        stats = YouTubeStats.objects.filter(
-            social_account=account).order_by('-recorded_at').first()
+        stats = YoutubeStats.objects.filter(
+            social_account=account).order_by('recorded_at')
 
         if not stats:
             return Response({"connected": False, "message": "No stats available"})
-        return Response({
-            "connected": True,
-            "title": stats.title,
-            "subscriber_count": stats.subscriber_count,
-            "view_count": stats.view_count,
-            "video_count": stats.video_count,
-            "last_updated": stats.recorded_at
-        })
+
+        data = [
+            {
+                "title": stat.title,
+                "subscriber_count": stat.subscriber_count,
+                "view_count": stat.view_count,
+                "video_count": stat.video_count,
+                "last_updated": stat.recorded_at.strftime("%d-%m-%Y"),
+            }
+            for stat in stats
+        ]
+        return Response({"connected": True, "data": data})
     except SocialAccount.DoesNotExist:
         return Response({"connected": False})
     except Exception as e:
@@ -124,52 +125,28 @@ def refresh_youtube_stats(request):
             user=request.user, platform="youtube")
         channel_id = account.channel_id
         api_key = settings.YOUTUBE_API_KEY
-
         # Fetch updated stats from YouTube API
-        url = f"https://www.googleapis.com/youtube/v3/channels?part=statistics&id={channel_id}&key={api_key}"
-        res = requests.get(url).json()
-
-        stats = res["items"][0]["statistics"]
-
-        # Save new stats
-        YouTubeStats.objects.create(
-            title=YouTubeStats.objects.get(
-                social_account=account).title,  # Keep the same title
+        url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id={channel_id}&key={api_key}"
+        print(url)
+        res = requests.get(url)
+        data = res.json().get("items", [])[0]
+        stats = data["statistics"]
+        snippet = data["snippet"]
+        YoutubeStats.objects.create(
+            title=snippet["title"],
             social_account=account,
             subscriber_count=int(stats["subscriberCount"]),
             view_count=int(stats["viewCount"]),
-            video_count=int(stats["videoCount"]),
-            recorded_at=timezone.now()
+            video_count=int(stats["videoCount"])
         )
 
         return Response({"message": "Stats refreshed successfully!"})
     except Exception as e:
         return Response({"error": str(e)}, status=400)
 
-
-# Get historical YouTube stats
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_youtube_stats(request):
-    account = SocialAccount.objects.get(user=request.user, platform="youtube")
-    stats = YouTubeStats.objects.filter(
-        social_account=account).order_by("recorded_at")
-
-    # Format stats for response
-    data = [
-        {
-            "title": stat.title,
-            "recorded_at": stat.recorded_at.strftime("%Y-%m-%d"),
-            "subscriber_count": stat.subscriber_count,
-            "view_count": stat.view_count,
-            "video_count": stat.video_count,
-        }
-        for stat in stats
-    ]
-    return Response(data)
-
-
 # Disconnect YouTube account
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def disconnect_youtube(request):
@@ -182,205 +159,6 @@ def disconnect_youtube(request):
         return Response({"error": "YouTube account not found."}, status=404)
     except Exception as e:
         return Response({"error": str(e)}, status=400)
-
-
-# Instagram functionality
-
-# Check Instagram connection status
-class InstagramStatusView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        try:
-            creds = InstagramCredential.objects.get(user=request.user)
-            return Response({
-                "connected": True,
-                "username": creds.instagram_username
-            })
-        except InstagramCredential.DoesNotExist:
-            return Response({
-                "connected": False
-            })
-
-
-# Fetch Instagram engagement stats
-@api_view(['POST'])
-def fetch_instagram_engagement(request):
-    username = request.data.get('username')
-    if not username:
-        return Response({"error": "No username provided"}, status=400)
-
-    try:
-        L = instaloader.Instaloader()
-        profile = instaloader.Profile.from_username(L.context, username)
-
-        total_likes = 0
-        total_comments = 0
-        post_count = 0
-
-        # Fetch stats for the latest 20 posts
-        for post in profile.get_posts():
-            total_likes += post.likes
-            total_comments += post.comments
-            post_count += 1
-            if post_count >= 20:
-                break
-
-        return Response({
-            "username": username,
-            "total_posts_checked": post_count,
-            "total_likes": total_likes,
-            "total_comments": total_comments,
-            "average_likes": round(total_likes / post_count, 2) if post_count else 0,
-            "average_comments": round(total_comments / post_count, 2) if post_count else 0,
-        })
-
-    except Exception as e:
-        return Response({"error": str(e)}, status=500)
-
-
-# Login and connect Instagram account
-class InstagramLoginView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-
-        # Save or update credentials
-        creds, created = InstagramCredential.objects.update_or_create(
-            user=request.user,
-            defaults={"instagram_username": username,
-                      "instagram_password": password}
-        )
-
-        # Login to Instagram using Instaloader
-        L = instaloader.Instaloader()
-        try:
-            L.login(username, password)
-            profile = instaloader.Profile.from_username(L.context, username)
-
-            # Gather stats for the latest 20 posts
-            total_likes = 0
-            total_comments = 0
-            total_posts = 0
-
-            for post in profile.get_posts():
-                total_likes += post.likes
-                total_comments += post.comments
-                total_posts += 1
-                if total_posts >= 20:
-                    break
-
-            avg_likes = total_likes / total_posts if total_posts else 0
-            avg_comments = total_comments / total_posts if total_posts else 0
-
-            InstagramStats.objects.create(
-                user=request.user,
-                total_likes=total_likes,
-                total_comments=total_comments,
-                total_posts_checked=total_posts,
-                avg_likes=avg_likes,
-                avg_comments=avg_comments,
-            )
-
-            return Response({"success": True, "message": "Stats saved successfully."})
-        except Exception as e:
-            return Response({"success": False, "error": str(e)}, status=400)
-
-
-# Connect Instagram account
-class ConnectInstagramView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        username = request.data.get("username")
-        password = request.data.get("password")
-
-        if not username or not password:
-            return Response({"error": "Both fields are required."}, status=400)
-
-        obj, created = InstagramCredential.objects.update_or_create(
-            user=request.user,
-            defaults={"instagram_username": username,
-                      "instagram_password": password}
-        )
-        return Response({"message": "Instagram account connected."})
-
-
-# Get Instagram stats
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_instagram_stats(request):
-    try:
-        stats = InstagramStats.objects.filter(user=request.user).last()
-        if not stats:
-            return Response({"error": "No stats found."}, status=404)
-
-        return Response({
-            "total_likes": stats.total_likes,
-            "total_comments": stats.total_comments,
-            "total_posts_checked": stats.total_posts_checked,
-            "avg_likes": stats.avg_likes,
-            "avg_comments": stats.avg_comments,
-            "timestamp": stats.created_at  # assuming auto_now_add=True
-        })
-    except Exception as e:
-        return Response({"error": str(e)}, status=500)
-
-
-# Refresh Instagram stats
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def refresh_instagram_stats(request):
-    try:
-        creds = InstagramCredential.objects.get(user=request.user)
-        L = instaloader.Instaloader()
-        L.login(creds.instagram_username, creds.instagram_password)
-        profile = instaloader.Profile.from_username(
-            L.context, creds.instagram_username)
-
-        total_likes = 0
-        total_comments = 0
-        post_count = 0
-
-        # Fetch stats for the latest 20 posts
-        for post in profile.get_posts():
-            total_likes += post.likes
-            total_comments += post.comments
-            post_count += 1
-            if post_count >= 20:
-                break
-
-        avg_likes = total_likes / post_count if post_count else 0
-        avg_comments = total_comments / post_count if post_count else 0
-
-        InstagramStats.objects.create(
-            user=request.user,
-            total_likes=total_likes,
-            total_comments=total_comments,
-            total_posts_checked=post_count,
-            avg_likes=avg_likes,
-            avg_comments=avg_comments,
-        )
-
-        return Response({"message": "Stats refreshed successfully."})
-
-    except InstagramCredential.DoesNotExist:
-        return Response({"error": "Instagram not connected."}, status=404)
-    except Exception as e:
-        return Response({"error": str(e)}, status=500)
-
-
-# Disconnect Instagram account
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
-def disconnect_instagram(request):
-    try:
-        InstagramCredential.objects.get(user=request.user).delete()
-        return Response({"message": "Instagram disconnected."})
-    except InstagramCredential.DoesNotExist:
-        return Response({"error": "Instagram not connected."}, status=404)
 
 
 # Connect Twitter account

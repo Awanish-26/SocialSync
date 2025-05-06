@@ -1,9 +1,9 @@
-import ConnectFacebook from "./cards/ConnectFacebookCard"
+import ConnectFacebook from "./connectCards/FacebookCard"
 function Facebook() {
   return (
     <div className="p-6">
       <div className="w-full h-full flex justify-center items-center">
-        <ConnectFacebook/>
+        <ConnectFacebook />
       </div>
     </div>
   );

@@ -1,25 +1,23 @@
 import { useState } from "react";
 import apiClient from "../../utils/apiClient";
 import { FaYoutube } from "react-icons/fa";
-import YoutubeInsights from "../insights/YoutubeInsights";
+import Youtube from "../Youtube";
 
 function ConnectYoutube() {
   const [channelId, setChannelId] = useState("");
-  const [stats, setStats] = useState(null); // Store YouTube stats
   const [loading, setLoading] = useState(false);
 
   const handleConnect = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await apiClient.post("/youtube/connect/", { channel_id: channelId });
-      alert("YouTube connected successfully");
-      // Fetch stats immediately after connection
-      const res = await apiClient.get("/youtube/status/");
-      if (res.data && res.data.connected) {
-        setStats(res.data); // Set stats for immediate display
-      } else {
-        alert("Failed to fetch stats. Please try again.");
+      const res = await apiClient.post("/youtube/connect/", { channel_id: channelId });
+      if (res.status === 200) {
+        alert("YouTube channel connected successfully!");
+        return <Youtube />;
+      }
+      else {
+        alert("Failed to connect YouTube channel. Please try again.");
       }
     } catch (err) {
       alert("Error connecting to YouTube");
@@ -27,10 +25,6 @@ function ConnectYoutube() {
     }
     setLoading(false);
   };
-
-  if (stats) {
-    return <YoutubeInsights stats={stats} />; // Display YouTube stats
-  }
 
   return (
     <form onSubmit={handleConnect} className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white hover:shadow-md transition">

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import apiClient from "../utils/apiClient";
-import ConnectInstagram from "./cards/ConnectInstagramCard";
+import ConnectInstagram from "./connectcards/InstagramCard";
 import InstagramInsights from "./insights/InstagramInsights";
 
 

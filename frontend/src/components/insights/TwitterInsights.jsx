@@ -14,7 +14,7 @@ function TwitterInsights() {
             const res = await apiClient.get("/twitter/stats");
             if (res.data.length > 0) {
                 setStats(res.data);
-                setTopStats(res.data[0]); // Use the first entry as the latest stats
+                setTopStats(res.data[res.data.length - 1]);
             }
         } catch (error) {
             console.error("Error fetching Twitter stats:", error);
@@ -40,17 +40,24 @@ function TwitterInsights() {
     }
 
     return (
-        <div className="mt-6 my-6 rounded relative">
-            <div className="rounded mb-4">
-                <h1 className="text-2xl font-bold text-gray-900">Twitter Insights</h1>
-                <div className="flex items-center mt-2 text-sm text-gray-500">
-                    <FiCalendar className="w-4 h-4 mr-1" />
-                    {topStats && (
-                        <span>Last updated: {topStats.timestamp}</span>
-                    )}
+        <div className="p-4 md:p-6 space-y-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Twitter Insights</h1>
+                    <div className="flex items-center mt-2 text-sm text-gray-500">
+                        <FiCalendar className="w-4 h-4 mr-1" />
+                        {topStats && (
+                            <span>Last updated: {topStats.timestamp}</span>
+                        )}
+                    </div>
+                </div>
+                <div className="flex items-center relative">
+                    <Button onClick={refreshStats} className="" variant="outline" size="md" icon={<FiRefreshCw className="w-4 h-4" />}>
+                        Refresh Data
+                    </Button>
                 </div>
             </div>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {topStats ? (
                     <>
                         <MetricCard
@@ -84,17 +91,6 @@ function TwitterInsights() {
                 ) : (
                     <div>Loading metrics...</div>
                 )}
-                <div className="flex items-center relative">
-                    <Button
-                        onClick={refreshStats}
-                        className="absolute right-0 top-0"
-                        variant="outline"
-                        size="md"
-                        icon={<FiRefreshCw className="w-4 h-4" />}
-                    >
-                        Refresh Data
-                    </Button>
-                </div>
             </div>
             {/* Chart Section */}
             <div className="bg-white p-4 rounded shadow">
