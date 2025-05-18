@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import apiClient from "../utils/apiClient";
 import ConnectInstagram from "./connectcards/InstagramCard";
-import InstagramInsights from "./insights/InstagramInsights";
 
 
 function Instagram() {
@@ -32,14 +31,16 @@ function Instagram() {
     );
   }
   return (
-    <div className="p-6">
-      <div className="w-full h-full flex justify-center items-center">
-        {isConnected ? (
-          <InstagramInsights />
-        ) : (<ConnectInstagram />)
-        }
-      </div>
-    </div>
+    <>
+      {isConnected ? (
+        <div className="p-6">
+          <div className="w-full h-full flex justify-center items-center">
+            <h1>insights logic is here</h1>
+          </div>
+        </div>
+      ) : (<ConnectInstagram />)
+      }
+    </>
   );
 }
 

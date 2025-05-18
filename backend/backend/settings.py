@@ -1,26 +1,20 @@
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-(00ar#iekhv$cqam+7df2=-%4t3s6m7f130r*$s9lu*%vsxg1_'
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
-# SECURITY WARNING: don't run with debug turned on in production!
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-TWITTER_***REMOVED***
-***REMOVED*** = "9TlB7Kf98aM9kdN3LJRFd2cNb5oQZbsyTBjSIdLTwpI2nB23Zu"
-# ***REMOVED***
-***REMOVED***
-***REMOVED***
-
+YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -33,6 +27,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework_simplejwt',
     'api',  # Your custom app for API endpoints
+    'youtube_api',  # Your custom app for YouTube API integration
 ]
 
 REST_FRAMEWORK = {
@@ -73,7 +68,6 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "http://localhost:3000",
     "http://localhost:8000",
 ]
 
@@ -85,9 +79,6 @@ DATABASES = {
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -104,10 +95,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -116,13 +103,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

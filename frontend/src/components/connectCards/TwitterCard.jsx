@@ -1,6 +1,7 @@
 import { useState } from "react";
 import apiClient from "../../utils/apiClient";
 import { FaTwitter } from "react-icons/fa";
+import Twitter from "../Twitter";
 
 function ConnectTwitterCard() {
   const [formData, setFormData] = useState({
@@ -9,6 +10,7 @@ function ConnectTwitterCard() {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [isConnected, setIsConnected] = useState(false); // New state for connection status
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -24,8 +26,12 @@ function ConnectTwitterCard() {
 
     try {
       const res = await apiClient.post("/twitter/connect/", formData);
-      setMessage(res.data.message);
-      window.location.reload(); // Refresh page to load TwitterInsights
+      if (res.status === 200) {
+        setMessage("Twitter account connected successfully!");
+        setIsConnected(true); // Update state to indicate successful connection
+      } else {
+        setMessage("Failed to connect Twitter account.");
+      }
     } catch (err) {
       console.error(err);
       setMessage("Failed to connect Twitter account.");
@@ -33,6 +39,10 @@ function ConnectTwitterCard() {
       setLoading(false);
     }
   };
+
+  if (isConnected) {
+    return <Twitter />; // Render Twitter component if connected
+  }
 
   return (
     <div className="flex flex-col items-stretch w-full max-w-md shadow-md justify-center border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white hover:shadow-md transition">

@@ -25,7 +25,6 @@ To display
 
 # Security Issue need attention
 
-- Secreat key and api keys must be stored in env files
 - axios get is localised must be generalised
 - youtube API must has restriction set on https://console.cloud.google.com/apis/credentials
   - @permission_classes([IsAuthenticated]) may cause error in api/views.py

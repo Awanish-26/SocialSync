@@ -1,7 +1,7 @@
 import { useState, useRef, useContext } from "react";
 import { SidebarContext } from "../components/context/SidebarContext";
 import Sidebar from "../components/Sidebar";
-import Topbar from "../components/Topbar";
+import Navbar from "../components/Navbar";
 import Analytics from "../components/Analytics";
 import Audience from "../components/Audience";
 import Settings from "../components/Settings";
@@ -129,7 +129,7 @@ function Dashboard() {
       </div>
       {/* Main Content */}
       <div className={`flex flex-col flex-1 ml-16 ${isCollapsed ? 'ml-16' : 'ml-72'} transition-all duration-300 ease-in-out`}>
-        <Topbar />
+        <Navbar />
         {/* Page Content */}
         <main className="p-6 mt-16">
           <div className="">{renderComponent()}</div>

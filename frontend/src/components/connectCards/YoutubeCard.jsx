@@ -6,6 +6,7 @@ import Youtube from "../Youtube";
 function ConnectYoutube() {
   const [channelId, setChannelId] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
 
   const handleConnect = async (e) => {
     e.preventDefault();
@@ -14,7 +15,7 @@ function ConnectYoutube() {
       const res = await apiClient.post("/youtube/connect/", { channel_id: channelId });
       if (res.status === 200) {
         alert("YouTube channel connected successfully!");
-        return <Youtube />;
+        setIsConnected(true);
       }
       else {
         alert("Failed to connect YouTube channel. Please try again.");
@@ -25,6 +26,10 @@ function ConnectYoutube() {
     }
     setLoading(false);
   };
+
+  if (isConnected) {
+    return <Youtube />;
+  }
 
   return (
     <form onSubmit={handleConnect} className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white hover:shadow-md transition">

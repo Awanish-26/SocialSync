@@ -127,7 +127,6 @@ def refresh_youtube_stats(request):
         api_key = settings.YOUTUBE_API_KEY
         # Fetch updated stats from YouTube API
         url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id={channel_id}&key={api_key}"
-        print(url)
         res = requests.get(url)
         data = res.json().get("items", [])[0]
         stats = data["statistics"]
@@ -198,46 +197,42 @@ def connect_twitter(request):
             likes_count=user.favourites_count,
         )
 
-        return Response({"message": "Twitter account connected and stats saved successfully."})
+        return Response({"message": "Twitter account connected and stats saved successfully."}, status=200)
     except Exception as e:
         return Response({"error": str(e)}, status=500)
-
-
-# Disconnect Twitter account
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
-def disconnect_twitter(request):
-    try:
-        TwitterCredential.objects.get(user=request.user).delete()
-        return Response({"message": "Twitter disconnected."})
-    except TwitterCredential.DoesNotExist:
-        return Response({"error": "Twitter not connected."}, status=404)
 
 
 # Get Twitter stats
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_twitter_stats(request):
+def get_twitter_status(request):
     try:
+        # Check if Twitter account is connected
+        try:
+            creds = TwitterCredential.objects.get(user=request.user)
+        except TwitterCredential.DoesNotExist:
+            return Response({"connected": False, "data": []})
+
+        # Fetch Twitter stats
         stats = TwitterStats.objects.filter(
             user=request.user).order_by('recorded_at')
         if not stats:
-            return Response({"error": "No stats found."}, status=404)
+            return Response({"connected": True, "data": []})
+
         data = [
             {
-                "title": stats.user.twittercredential.twitter_username,
-                "followers_count": stats.followers_count,
-                "tweets_count": stats.tweets_count,
-                "likes_count": stats.likes_count,
-                "timestamp": stats.recorded_at.strftime("%Y-%m-%d"),
-            } for stats in stats
+                "title": creds.twitter_username,
+                "followers_count": stat.followers_count,
+                "tweets_count": stat.tweets_count,
+                "likes_count": stat.likes_count,
+                "timestamp": stat.recorded_at.strftime("%Y-%m-%d"),
+            } for stat in stats
         ]
-        return Response(data)
+        return Response({"connected": True, "data": data})
     except Exception as e:
         return Response({"error": str(e)}, status=500)
 
 
-# Refresh Twitter stats
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def refresh_twitter_stats(request):
@@ -266,17 +261,12 @@ def refresh_twitter_stats(request):
         return Response({"error": str(e)}, status=500)
 
 
-# Get Twitter connection status
-@api_view(['GET'])
+# Disconnect Twitter account
+@api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-def get_twitter_status(request):
+def disconnect_twitter(request):
     try:
-        creds = TwitterCredential.objects.get(user=request.user)
-        return Response({
-            "connected": True,
-            "username": creds.twitter_username
-        })
+        TwitterCredential.objects.get(user=request.user).delete()
+        return Response({"message": "Twitter disconnected."})
     except TwitterCredential.DoesNotExist:
-        return Response({
-            "connected": False
-        })
+        return Response({"error": "Twitter not connected."}, status=404)

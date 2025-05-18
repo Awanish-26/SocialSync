@@ -8,7 +8,6 @@ from .views import (
     disconnect_youtube,
     connect_twitter,
     disconnect_twitter,
-    get_twitter_stats,
     refresh_twitter_stats,
     get_twitter_status
 )
@@ -26,7 +25,6 @@ urlpatterns = [
     # Twitter endpoints
     path('twitter/connect/', connect_twitter, name='connect_twitter'),
     path('twitter/status/', get_twitter_status, name='get_twitter_status'),
-    path('twitter/stats/', get_twitter_stats, name='get_twitter_stats'),
     path('twitter/refresh/', refresh_twitter_stats, name='refresh_twitter_stats'),
     path('twitter/disconnect/', disconnect_twitter, name='disconnect_twitter'),
 ]
