@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 
 class SocialAccount(models.Model):
@@ -35,7 +36,7 @@ class YoutubeStats(models.Model):
     subscriber_count = models.IntegerField(default=0)
     view_count = models.BigIntegerField(default=0)
     video_count = models.IntegerField(default=0)
-    recorded_at = models.DateTimeField(auto_now_add=True)
+    recorded_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"YouTube Stats for {self.social_account.user.username}"
@@ -46,7 +47,7 @@ class TwitterCredential(models.Model):
     twitter_username = models.CharField(max_length=255)
     access_token = models.CharField(max_length=255)
     access_token_secret = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"{self.user.username} - {self.twitter_username}"
@@ -57,7 +58,7 @@ class TwitterStats(models.Model):
     followers_count = models.IntegerField()
     tweets_count = models.IntegerField()
     likes_count = models.IntegerField()
-    recorded_at = models.DateTimeField(auto_now_add=True)
+    recorded_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"Stats for {self.user.username} at {self.recorded_at}"

@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import hero_image from '../assets/hero.svg';
-import Navbar from '../components/Navbar';
+import { Navbar } from '../components/';
 import { motion } from 'framer-motion';
 import about_image from '../assets/about.svg';
 

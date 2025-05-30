@@ -1,27 +1,38 @@
 import { useState, useRef, useContext } from "react";
-import { SidebarContext } from "../components/context/SidebarContext";
-import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar";
-import Analytics from "../components/Analytics";
-import Audience from "../components/Audience";
-import Settings from "../components/Settings";
-import Instagram from "../components/Instagram";
-import Facebook from "../components/Facebook";
-import Twitter from "../components/Twitter";
-import Youtube from "../components/Youtube";
+import { Sidebar, Navbar, Analytics, Audience, Settings, Instagram, Facebook, Twitter, Youtube, SidebarContext, Button, Card, MetricsGrid, ChartCard, RecommendationCard } from "../components";
 import { mockProfiles, getProfileMetrics, getTimeSeriesData, generateRecommendations } from "../utils/mockData";
-import Button from '../components/ui/Button';
-import Card from '../components/ui/Card';
-import MetricsGrid from '../components/metrics/MetricsGrid';
-import ChartCard from '../components/charts/ChartCard';
-import RecommendationCard from '../components/insights/RecommendationCard';
-import { FiCalendar, FiRefreshCw, FiDownload } from 'react-icons/fi';
+import { FiCalendar, FiRefreshCw, FiDownload, FiUsers, FiEye, FiThumbsUp } from 'react-icons/fi';
+import useApi from "../components/useApi";
 
 function Dashboard() {
   const [activeComponent, setActiveComponent] = useState("Dashboard");
   const sidebarRef = useRef(null);
   const { isCollapsed } = useContext(SidebarContext);
 
+
+  // getting the data from connected profiles
+  // Fetch real data from backend
+  const yt = useApi('/youtube/status/');
+  const tw = useApi('/twitter/status/');
+
+  // Loading and error handling
+  if (yt.loading || tw.loading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
+  if (yt.error || tw.error) {
+    return <div className="flex justify-center items-center h-screen text-red-500">Error loading data.</div>;
+  }
+
+  // Extract real data
+  const ytData = yt.data?.data || [];
+  const twData = tw.data?.data || [];
+  const latestYt = ytData[ytData.length - 1] || {};
+  const latestTw = twData[twData.length - 1] || {};
+
+  // Example: Calculate total followers if available
+  const totalFollowers = (latestYt.subscriber_count || 0) + (latestTw.followers_count || 0);
+  const totallikes = (latestYt.likes || 0) + (latestTw.likes_count || 0);
+  const totalViews = (latestYt.view_count || 0) + (latestTw.views || 0);
   // Use the first mock profile as the selected profile
   const selectedProfile = mockProfiles[0];
 
@@ -71,7 +82,38 @@ function Dashboard() {
             {/* Metrics Overview */}
             <div>
               <h2 className="text-lg font-medium text-gray-900 mb-4">Overview</h2>
-              <MetricsGrid metrics={metrics} />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Followers Card */}
+                <Card title="Followers">
+                  <div className="flex items-center space-x-2">
+                    <FiUsers className="text-2xl" />
+                    <span className="text-2xl font-bold">{totalFollowers}</span>
+                  </div>
+                  <div className="text-sm text-gray-500 mt-2">
+                    YouTube: {latestYt.subscriber_count || 0} | Twitter: {latestTw.followers_count || 0}
+                  </div>
+                </Card>
+                {/* Likes Card */}
+                <Card title="Likes">
+                  <div className="flex items-center space-x-2">
+                    <FiThumbsUp className="text-2xl" />
+                    <span className="text-2xl font-bold">{totallikes}</span>
+                  </div>
+                  <div className="text-sm text-gray-500 mt-2">
+                    YouTube: {latestYt.likes || 0} | Twitter: {latestTw.likes_count || 0}
+                  </div>
+                </Card>
+                {/* Views Card */}
+                <Card title="Views">
+                  <div className="flex items-center space-x-2">
+                    <FiEye className="text-2xl" />
+                    <span className="text-2xl font-bold">{totalViews}</span>
+                  </div>
+                  <div className="text-sm text-gray-500 mt-2">
+                    YouTube: {latestYt.view_count || 0} | Twitter: {latestTw.views || 0}
+                  </div>
+                </Card>
+              </div>
             </div>
 
             {/* Charts Section */}

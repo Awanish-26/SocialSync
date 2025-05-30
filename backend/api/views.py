@@ -165,7 +165,7 @@ def disconnect_youtube(request):
 @permission_classes([IsAuthenticated])
 def connect_twitter(request):
     api_key = settings.TWITTER_API_KEY
-    api_secret = settings.***REMOVED***
+    api_secret = settings.TWITTER_API_SECRET
     access_token = request.data.get("access_token")
     access_token_secret = request.data.get("access_token_secret")
 
@@ -240,7 +240,7 @@ def refresh_twitter_stats(request):
         creds = TwitterCredential.objects.get(user=request.user)
         auth = tweepy.OAuth1UserHandler(
             settings.TWITTER_API_KEY,
-            settings.***REMOVED***,
+            settings.TWITTER_API_SECRET,
             creds.access_token,
             creds.access_token_secret,
         )

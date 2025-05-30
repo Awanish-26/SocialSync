@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import { FaSearch } from 'react-icons/fa';
-import { FiUser } from 'react-icons/fi'
+import { FiUser, FiSearch } from 'react-icons/fi'
 import { IoMdNotificationsOutline } from "react-icons/io";
 
 function Navbar() {
@@ -30,7 +29,7 @@ function Navbar() {
               <h2 className="text-transparent bg-clip-text bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-500 text-3xl font-bold select-none ml-16">SocialSync</h2>
             </div>
             <div className="relative items-center space-x-4 w-1/3 ">
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 id="search-input"
                 name="search"

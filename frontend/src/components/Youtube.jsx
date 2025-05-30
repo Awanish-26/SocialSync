@@ -1,10 +1,8 @@
-import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useEffect, useState } from "react";
-import { FiUsers, FiEye, FiVideo, FiRefreshCw, FiCalendar } from 'react-icons/fi';
 import apiClient from "../utils/apiClient";
-import MatrixCard from "./metrics/MetricCard";
-import Button from "./ui/Button";
-import ConnectYoutube from "./connectCards/YoutubeCard";
+import { FiUsers, FiEye, FiVideo, FiRefreshCw, FiCalendar } from 'react-icons/fi';
+import { MetricCard, Button, ChartCard, ConnectYoutube } from "../components"
+
 
 function Youtube() {
   const [isConnected, setIsConnected] = useState(false);
@@ -42,6 +40,22 @@ function Youtube() {
     fetchStatus();
   }, []);
 
+  // Converts "30-05-2025" to "2025-05-30" and match the format used in data parsing
+  const formatDate = (dateStr) => {
+    const [day, month, year] = dateStr.split("-");
+    return `${year}-${month}-${day}`;
+  };
+
+  const getChartData = (key) =>
+    Array.isArray(data)
+      ? data
+        .filter((item) => typeof item[key] === "number" || !isNaN(Number(item[key])))
+        .map((item) => ({
+          value: Number(item[key]) || 0,
+          date: formatDate(item.last_updated),
+        }
+        ))
+      : [];
   if (loading) return <div className="text-center py-10">Loading...</div>;
 
   return (
@@ -61,72 +75,14 @@ function Youtube() {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <MatrixCard
-              title="Subscribers"
-              metric={{
-                value: lateststats.subscriber_count,
-                change: 0,
-                trend: 'neutral',
-              }}
-              icon={<FiUsers className="text-2xl" />}
-            />
-            <MatrixCard
-              title="Views"
-              metric={{
-                value: lateststats.view_count,
-                change: 0,
-                trend: 'up',
-              }}
-              icon={<FiEye className="text-2xl" />}
-            />
-            <MatrixCard
-              title="Videos"
-              metric={{
-                value: lateststats.video_count,
-                change: 0,
-                trend: 'down',
-              }}
-              icon={<FiVideo className="text-2xl" />}
-            />
-
+            <MetricCard title="Subscribers" metric={{ value: lateststats.subscriber_count, change: 0, trend: 'neutral', }} icon={<FiUsers className="text-2xl" />} />
+            <MetricCard title="Views" metric={{ value: lateststats.view_count, change: 0, trend: 'up', }} icon={<FiEye className="text-2xl" />} />
+            <MetricCard title="Videos" metric={{ value: lateststats.video_count, change: 0, trend: 'down', }} icon={<FiVideo className="text-2xl" />} />
           </div>
           <div className="mt-6 mb-4 grid grid-cols-2 gap-4">
-            <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-lg font-bold mb-4">Subscribers Growth</h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={data}>
-                  <XAxis dataKey="last_updated" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="subscriber_count" stroke="#3B82F6" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-lg font-bold mb-4">Views Growth</h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={data}>
-                  <XAxis dataKey="last_updated" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="view_count" stroke="#3B82F6" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-lg font-bold mb-4">Videos Growth</h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={data}>
-                  <XAxis dataKey="last_updated" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="video_count" stroke="#3B82F6" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <ChartCard title="Subscribers Growth" data={getChartData("subscriber_count")} color="#3B82F6" timeframe="Last 30 days" height={300} />
+            <ChartCard title="Views Growth" data={getChartData("view_count")} color="#10B981" timeframe="Last 30 days" height={300} />
+            <ChartCard title="Videos Growth" data={getChartData("video_count")} color="#F59E42" timeframe="Last 30 days" height={300} />
           </div>
         </div>
       ) : (

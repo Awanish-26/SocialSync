@@ -1,10 +1,7 @@
-import { useEffect, useState } from "react";
 import apiClient from "../utils/apiClient";
-import MetricCard from "./metrics/MetricCard";
-import ConnectTwitterCard from "./connectCards/TwitterCard";
+import { useEffect, useState } from "react";
 import { FiUsers, FiMessageSquare, FiHeart, FiRefreshCw, FiCalendar } from "react-icons/fi";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import Button from "./ui/Button";
+import { ChartCard, Button, MetricCard, ConnectTwitterCard } from "../components";
 
 function Twitter() {
   const [isConnected, setIsConnected] = useState(false);
@@ -42,6 +39,27 @@ function Twitter() {
     }
   };
 
+  // Format date if needed (assuming stats[].timestamp is ISO or "DD-MM-YYYY")
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    if (dateStr.includes("-") && dateStr.split("-")[0].length === 2) {
+      // "DD-MM-YYYY" to "YYYY-MM-DD"
+      const [day, month, year] = dateStr.split("-");
+      return `${year}-${month}-${day}`;
+    }
+    return dateStr;
+  };
+
+  // Prepare data for ChartCard
+  const getChartData = (key) =>
+    Array.isArray(stats)
+      ? stats
+        .filter((item) => typeof item[key] === "number" || !isNaN(Number(item[key])))
+        .map((item) => ({
+          value: Number(item[key]) || 0,
+          date: formatDate(item.timestamp),
+        }))
+      : [];
 
   if (!stats) {
     return <div>Loading...</div>;
@@ -105,41 +123,28 @@ function Twitter() {
             )}
           </div>
           {/* Chart Section */}
-          <div className="bg-white p-4 rounded shadow">
-            <h2 className="text-lg font-bold mb-4">Followers Growth</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={stats}>
-                <XAxis dataKey="timestamp" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="followers_count" stroke="#3B82F6" />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="bg-white p-4 rounded shadow mt-4">
-            <h2 className="text-lg font-bold mb-4">Tweets Growth</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={stats}>
-                <XAxis dataKey="timestamp" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="tweets_count" stroke="#3B82F6" />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="bg-white p-4 rounded shadow mt-4">
-            <h2 className="text-lg font-bold mb-4">Likes Growth</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={stats}>
-                <XAxis dataKey="timestamp" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="likes_count" stroke="#3B82F6" />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="mt-6 mb-4 grid grid-cols-2 gap-4">
+            <ChartCard
+              title="Followers Growth"
+              data={getChartData("followers_count")}
+              color="#3B82F6"
+              timeframe="Last 30 days"
+              height={300}
+            />
+            <ChartCard
+              title="Tweets Growth"
+              data={getChartData("tweets_count")}
+              color="#10B981"
+              timeframe="Last 30 days"
+              height={300}
+            />
+            <ChartCard
+              title="Likes Growth"
+              data={getChartData("likes_count")}
+              color="#F59E42"
+              timeframe="Last 30 days"
+              height={300}
+            />
           </div>
         </div>
       ) : <ConnectTwitterCard />}
