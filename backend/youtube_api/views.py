@@ -1,118 +1,203 @@
-from django.shortcuts import redirect, render
-from django.urls import reverse
+# youtube_integration/views.py
 from django.conf import settings
+from django.shortcuts import redirect
+from django.contrib.auth import get_user_model
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from google_auth_oauthlib.flow import Flow
 from google.oauth2.credentials import Credentials
-import googleapiclient.discovery
-import os
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+import datetime
+from django.utils import timezone
 
-# Ensure settings are configured
-if not hasattr(settings, 'GOOGLE_CLIENT_ID') or not hasattr(settings, 'GOOGLE_CLIENT_SECRET'):
-    raise Exception(
-        "Please configure GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in your Django settings.")
+from .models import YouTubeCredentials
 
-GOOGLE_CLIENT_ID = settings.GOOGLE_CLIENT_ID
-GOOGLE_CLIENT_SECRET = settings.GOOGLE_CLIENT_SECRET
-GOOGLE_REDIRECT_URI = getattr(
-    settings, 'GOOGLE_REDIRECT_URI', 'http://localhost:8000/oauth/callback/')
-# Add other scopes as needed
-YOUTUBE_SCOPES = ['https://www.googleapis.com/auth/youtube.readonly',
-                  'https://www.googleapis.com/auth/youtube.force-ssl',
-                  'https://www.googleapis.com/auth/youtube.upload',
-                  ]
+User = get_user_model()
 
 
-def google_login(request):
-    flow = Flow.from_client_secrets_file(
-        # Update this path
-        os.path.join(settings.BASE_DIR, 'path/to/your/client_secret.json'),
-        scopes=YOUTUBE_SCOPES,
-        redirect_uri=request.build_absolute_uri(reverse('oauth_callback'))
-    )
-    authorization_url, state = flow.authorization_url(
-        # Enable offline access so that you can refresh an access token without
-        # re-prompting the user for permission. Recommended for web server apps.
-        access_type='offline',
-        # A random string, include it in the state parameter of the authorization
-        # request and confirm that it matches the state parameter in the
-        # authorization response.
-        include_granted_scopes='true'
-    )
-    request.session['oauth_state'] = state
-    return redirect(authorization_url)
+class YouTubeAuthInitiateView(APIView):
+    # Or AllowAny if users can initiate before logging into your app
+    permission_classes = [IsAuthenticated]
 
-
-def google_callback(request):
-    state = request.session.get('oauth_state')
-    if state is None or request.GET.get('state') != state:
-        return render(request, 'oauth_error.html', {'error': 'Invalid state parameter.'})
-
-    flow = Flow.from_client_secrets_file(
-        # Update this path
-        os.path.join(settings.BASE_DIR, 'path/to/your/client_secret.json'),
-        scopes=YOUTUBE_SCOPES,
-        redirect_uri=request.build_absolute_uri(reverse('oauth_callback'))
-    )
-
-    try:
-        flow.fetch_token(code=request.GET.get('code'))
-    except Exception as e:
-        return render(request, 'oauth_error.html', {'error': f'Failed to fetch token: {e}'})
-
-    credentials = flow.credentials
-    # Store the credentials securely in your database associated with the user.
-    # You'll likely want to serialize this.
-    request.session['credentials'] = {
-        'token': credentials.token,
-        'refresh_token': credentials.refresh_token,
-        'token_uri': credentials.token_uri,
-        'client_id': credentials.client_id,
-        'client_secret': credentials.client_secret,
-        'scopes': credentials.scopes
-    }
-
-    return redirect('fetch_youtube_data')  # Redirect to a view to fetch data
-
-
-def fetch_youtube_data(request):
-    credentials_data = request.session.get('credentials')
-    if not credentials_data:
-        return redirect('google_login')
-
-    credentials = Credentials(**credentials_data)
-    youtube = googleapiclient.discovery.build(
-        'youtube', 'v3', credentials=credentials)
-
-    try:
-        # Example: Get the authenticated user's channel
-        request_channel = youtube.channels().list(
-            part='snippet,statistics',
-            mine=True
+    def get(self, request):
+        flow = Flow.from_client_secrets_file(
+            None,  # We will pass client_config directly
+            scopes=settings.GOOGLE_OAUTH2_SCOPES,
+            redirect_uri=settings.GOOGLE_OAUTH2_REDIRECT_URI
         )
-        response_channel = request_channel.execute()
-        channel_data = response_channel.get('items', [])
-
-        # Example: Get the authenticated user's uploads
-        request_uploads = youtube.channels().list(
-            part='contentDetails',
-            mine=True
-        )
-        response_uploads = request_uploads.execute()
-        uploads_playlist_id = response_uploads['items'][0]['contentDetails']['relatedPlaylists']['uploads']
-        request_videos = youtube.playlistItems().list(
-            part='snippet',
-            playlistId=uploads_playlist_id,
-            maxResults=10  # Adjust as needed
-        )
-        response_videos = request_videos.execute()
-        video_data = response_videos.get('items', [])
-
-        context = {
-            'channel_data': channel_data,
-            'video_data': video_data,
+        # Instead of client_secrets.json, provide config directly
+        flow.client_config = {
+            "web": {
+                "client_id": settings.GOOGLE_OAUTH2_CLIENT_ID,
+                "client_secret": settings.GOOGLE_OAUTH2_CLIENT_SECRET,
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            }
         }
-        return render(request, 'youtube_data.html', context)
 
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return render(request, 'oauth_error.html', {'error': f'Error fetching YouTube data: {e}'})
+        authorization_url, state = flow.authorization_url(
+            access_type='offline',  # Important for getting a refresh token
+            include_granted_scopes='true'
+        )
+        # Store state in session to verify it in the callback if needed for CSRF protection
+        request.session['oauth_state'] = state
+        return Response({'authorization_url': authorization_url})
+
+
+class YouTubeAuthCallbackView(APIView):
+    # Google redirects here, user might not have a session yet
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        state = request.GET.get('state')
+        # Optional: Verify state matches request.session.get('oauth_state') for security
+
+        flow = Flow.from_client_secrets_file(
+            None,
+            scopes=settings.GOOGLE_OAUTH2_SCOPES,
+            redirect_uri=settings.GOOGLE_OAUTH2_REDIRECT_URI,
+            # state=state # Pass state back if you used it
+        )
+        flow.client_config = {
+            "web": {
+                "client_id": settings.GOOGLE_OAUTH2_CLIENT_ID,
+                "client_secret": settings.GOOGLE_OAUTH2_CLIENT_SECRET,
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+            }
+        }
+
+        try:
+            flow.fetch_token(
+                authorization_response=request.build_absolute_uri())
+        except Exception as e:
+            # Handle exceptions like MismatchingStateError, etc.
+            return Response({'error': 'Failed to fetch token: ' + str(e)}, status=400)
+
+        credentials = flow.credentials
+
+        # Ensure the user is logged into your Django app
+        # This part depends on how you manage users.
+        # If the user isn't logged in, you might redirect them to your app's login page first,
+        # or handle user association differently. For simplicity, assuming the user is logged in:
+        if not request.user.is_authenticated:
+            # Handle case where user is not logged in.
+            # You might redirect to a page on your frontend to log in/register
+            # and then re-initiate or store the token temporarily.
+            # For now, returning an error.
+            return Response({'error': 'User not authenticated in Django app. Please log in.'}, status=401)
+
+        # Store the credentials
+        user_creds, created = YouTubeCredentials.objects.update_or_create(
+            user=request.user,
+            defaults={
+                'access_token': credentials.token,
+                # This might be None if already granted offline access
+                'refresh_token': credentials.refresh_token,
+                'token_expiry': credentials.expiry,
+                'scopes': " ".join(credentials.scopes) if credentials.scopes else "",
+            }
+        )
+        if not user_creds.refresh_token and credentials.refresh_token:
+            user_creds.refresh_token = credentials.refresh_token
+            user_creds.save()
+
+        # Redirect to a success page on your Vite frontend
+        # Or your production URL
+        frontend_success_url = 'http://localhost:5173/youtube-auth-success'
+        return redirect(frontend_success_url)
+
+
+class YouTubeChannelInfoView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_youtube_service(self, user):
+        try:
+            creds_model = YouTubeCredentials.objects.get(user=user)
+        except YouTubeCredentials.DoesNotExist:
+            raise HttpError(
+                "User has not authenticated with YouTube.", status_code=401)
+
+        credentials = Credentials(
+            token=creds_model.access_token,
+            refresh_token=creds_model.refresh_token,
+            token_uri='https://oauth2.googleapis.com/token',
+            client_id=settings.GOOGLE_OAUTH2_CLIENT_ID,
+            client_secret=settings.GOOGLE_OAUTH2_CLIENT_SECRET,
+            scopes=creds_model.scopes.split(
+                " ") if creds_model.scopes else settings.GOOGLE_OAUTH2_SCOPES
+        )
+
+        if credentials.expired and credentials.refresh_token:
+            try:
+                # from google.auth.transport.requests import Request
+                credentials.refresh(Request())
+                # Update stored credentials
+                creds_model.access_token = credentials.token
+                creds_model.token_expiry = credentials.expiry
+                creds_model.save()
+            except Exception as e:
+                raise HttpError(
+                    f"Failed to refresh token: {str(e)}", status_code=401)
+
+        if not credentials.valid:
+            # This could happen if refresh also failed or no refresh token
+            raise HttpError(
+                "Invalid or expired YouTube credentials.", status_code=401)
+
+        return build('youtube', 'v3', credentials=credentials)
+
+    def get(self, request):
+        try:
+            youtube = self.get_youtube_service(request.user)
+            # Example: Get channel info
+            response = youtube.channels().list(
+                part='snippet,contentDetails,statistics',
+                mine=True  # Gets the authenticated user's channel
+            ).execute()
+            return Response(response)
+        except HttpError as e:
+            return Response({'error': str(e.resp.reason if hasattr(e, 'resp') else e), 'details': e.content.decode() if hasattr(e, 'content') else str(e)}, status=e.resp.status if hasattr(e, 'resp') else 500)
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+
+# Example: View to post a comment (simplified)
+class YouTubePostCommentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        video_id = request.data.get('video_id')
+        comment_text = request.data.get('comment_text')
+        # Required for commentThreads.insert
+        channel_id = request.data.get('channel_id')
+
+        if not all([video_id, comment_text, channel_id]):
+            return Response({'error': 'video_id, channel_id, and comment_text are required.'}, status=400)
+
+        try:
+            youtube_service = YouTubeChannelInfoView().get_youtube_service(
+                request.user)  # Reuse the service getter
+            insert_request = youtube_service.commentThreads().insert(
+                part="snippet",
+                body={
+                    "snippet": {
+                        "channelId": channel_id,  # ID of the channel posting the comment
+                        "videoId": video_id,     # ID of the video being commented on
+                        "topLevelComment": {
+                            "snippet": {
+                                "textOriginal": comment_text
+                            }
+                        }
+                    }
+                }
+            )
+            response = insert_request.execute()
+            return Response(response, status=201)
+        except HttpError as e:
+            return Response({'error': str(e.resp.reason if hasattr(e, 'resp') else e), 'details': e.content.decode() if hasattr(e, 'content') else str(e)}, status=e.resp.status if hasattr(e, 'resp') else 500)
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)

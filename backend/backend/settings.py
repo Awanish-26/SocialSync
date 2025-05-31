@@ -13,10 +13,16 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 TWITTER_API_KEY = os.getenv("API_KEY")
 TWITTER_API_SECRET = os.getenv("API_KAY_SECRET")
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+# Must match one in Google Console
+GOOGLE_OAUTH2_REDIRECT_URI = 'http://localhost:5173/dashboard'
+GOOGLE_OAUTH2_SCOPES = [
+    'https://www.googleapis.com/auth/youtube.force-ssl',
+    # Add other scopes if needed
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',

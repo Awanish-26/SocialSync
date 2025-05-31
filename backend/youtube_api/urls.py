@@ -1,8 +1,17 @@
+# youtube_integration/urls.py
 from django.urls import path
+from .views import (
+    YouTubeAuthInitiateView,
+    YouTubeAuthCallbackView,
+    YouTubeChannelInfoView,
+    YouTubePostCommentView
+)
 
 urlpatterns = [
-    # Add your API endpoints here
-    # Example:
-    # path('example/', ExampleView.as_view(), name='example'),
-    # path('youtube/connect/', connect_youtube, name='connect_youtube'),
+    path('youtube/initiate/', YouTubeAuthInitiateView.as_view(),
+         name='youtube_auth_initiate'),
+    path('youtube/channel-info/', YouTubeChannelInfoView.as_view(),
+         name='youtube_channel_info'),
+    path('youtube/post-comment/', YouTubePostCommentView.as_view(),
+         name='youtube_post_comment'),
 ]
