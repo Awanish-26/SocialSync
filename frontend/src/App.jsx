@@ -5,9 +5,9 @@ import Signup from './pages/Signup';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import PrivateRoute from './components/PrivateRoute';
+import Navbar from './components/Navbar';
 
 function App() {
-
   return (
     <BrowserRouter>
       <SidebarProvider>
