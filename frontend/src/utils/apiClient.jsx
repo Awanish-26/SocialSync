@@ -13,6 +13,10 @@ apiClient.interceptors.request.use(
             config.headers["Authorization"] = `Bearer ${newToken}`; // Set the new token
         } catch (err) {
             console.error("Error refreshing token:", err);
+            // If refresh fails, clear tokens and redirect to login
+            localStorage.clear();
+            window.location.href = "/login";
+            throw err;
         }
         return config;
     },

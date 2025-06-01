@@ -1,9 +1,7 @@
-import React from 'react';
 import { FiCalendar, FiDownload } from 'react-icons/fi';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import ChartCard from '../components/charts/ChartCard';
-import { getTimeSeriesData } from '../utils/mockData';
 
 const Analytics = ({ selectedProfile }) => {
   if (!selectedProfile || !selectedProfile.id) {

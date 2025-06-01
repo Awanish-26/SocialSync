@@ -31,11 +31,24 @@ function Signup() {
     setError("");
     try {
       const res = await axios.post('http://localhost:8000/api/signup/', formData);
-      console.log(res.data);
-      navigate("/login");
+      // After signup, immediately log the user in
+      const loginRes = await axios.post('http://localhost:8000/api/login/', {
+        username: formData.username,
+        password: formData.password,
+      });
+      // Store auth data
+      localStorage.setItem("access", loginRes.data.access);
+      localStorage.setItem("refresh", loginRes.data.refresh);
+      localStorage.setItem("name", loginRes.data.name);
+      window.dispatchEvent(new Event('authStateChanged'));
+      navigate("/dashboard");
     } catch (err) {
-      console.error(err.response.data);
-      setError(err.response.data.error || "Something went wrong");
+      if (err.response && err.response.data && err.response.data.error) {
+        setError(err.response.data.error);
+      } else {
+        setError("Something went wrong");
+      }
+      console.error(err);
     } finally {
       setLoading(false);
     }

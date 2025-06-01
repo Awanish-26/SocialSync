@@ -121,16 +121,18 @@ function Navbar() {
                       e.stopPropagation();
                       setShowDropdown(!showDropdown);
                     }}
-                    className={`flex items-center space-x-3 ${
-                      isDarkMode
-                        ? 'bg-gray-700/50 border-gray-600/50 text-gray-200 hover:bg-gray-600/50'
-                        : 'bg-gray-100 border-gray-200 text-gray-900 hover:bg-gray-200'
-                    } px-4 py-2 rounded-lg border transition-all`}
+                    className={`flex items-center group focus:outline-none border-0 bg-transparent shadow-none p-0 transition-all`}
+                    style={{ boxShadow: 'none' }}
                   >
-                    <FiUser className="w-5 h-5" />
-                    <span>{userName}</span>
+                    {/* Modern avatar circle with initial */}
+                    <span
+                      className={`inline-flex items-center justify-center rounded-full h-9 w-9 text-lg font-semibold select-none
+                        ${isDarkMode ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-700'}
+                        border border-indigo-400/20 group-hover:ring-2 group-hover:ring-indigo-400/40 transition-all`}
+                    >
+                      {userName?.[0]?.toUpperCase() || <FiUser className="w-5 h-5" />}
+                    </span>
                   </motion.button>
-
                   <AnimatePresence>
                     {showDropdown && (
                       <motion.div

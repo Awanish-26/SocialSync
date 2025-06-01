@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Landing from './pages/Landing';
+import AIAssistant from './components/AIAssistant';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <SidebarProvider>
         <Router>
           <Layout>
+            <AIAssistant />
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/dashboard" element={<Dashboard />} />
