@@ -1,90 +1,145 @@
 import { useContext } from 'react';
-import { SidebarContext } from '../components/context/SidebarContext';
+import { SidebarContext } from './context/SidebarContext';
 import { FaTachometerAlt, FaChartBar, FaUsers, FaCog, FaInstagram, FaFacebook, FaTwitter, FaBars, FaYoutube } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from './context/ThemeContext';
 
-const Sidebar = ({ setActiveComponent }) => {
+const MenuItem = ({ icon: Icon, label, onClick, isCollapsed, isActive }) => {
+  const { isDarkMode } = useTheme();
+  
+  return (
+    <motion.li
+      whileHover={{ x: 5 }}
+      whileTap={{ scale: 0.95 }}
+      className={`px-4 py-3 flex items-center cursor-pointer transition-all duration-200 ${
+        isActive 
+          ? `${isDarkMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-50 text-indigo-600'}`
+          : `${isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`
+      } rounded-lg mx-2`}
+      onClick={onClick}
+    >
+      <Icon className={`w-5 h-5 ${isActive ? (isDarkMode ? 'text-indigo-400' : 'text-indigo-600') : ''}`} />
+      <AnimatePresence>
+        {!isCollapsed && (
+          <motion.span
+            initial={{ opacity: 0, width: 0 }}
+            animate={{ opacity: 1, width: 'auto' }}
+            exit={{ opacity: 0, width: 0 }}
+            className="ml-3 whitespace-nowrap"
+          >
+            {label}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </motion.li>
+  );
+};
+
+const Sidebar = ({ setActiveComponent, activeComponent }) => {
   const { isCollapsed, toggleSidebar } = useContext(SidebarContext);
+  const { isDarkMode } = useTheme();
+
+  const menuItems = [
+    { icon: FaTachometerAlt, label: 'Dashboard', id: 'Dashboard' },
+    { icon: FaChartBar, label: 'Analytics', id: 'Analytics' },
+    { icon: FaUsers, label: 'Audience', id: 'Audience' },
+    { icon: FaCog, label: 'Settings', id: 'Settings' },
+  ];
+
+  const socialItems = [
+    { icon: FaInstagram, label: 'Instagram', id: 'Instagram', color: 'text-pink-500' },
+    { icon: FaFacebook, label: 'Facebook', id: 'Facebook', color: 'text-blue-500' },
+    { icon: FaTwitter, label: 'Twitter', id: 'Twitter', color: 'text-blue-400' },
+    { icon: FaYoutube, label: 'Youtube', id: 'Youtube', color: 'text-red-500' },
+  ];
 
   return (
-    <div className="flex">
-      <div className={`fixed left-0 h-screen ${isCollapsed ? 'w-16' : 'w-72'} bg-gray-800 text-white z-40 overflow-hidden transition-[width] duration-300 ease-in-out`}>
-        <div className="py-5 px-6 flex justify-between items-center border-b border-gray-700">
-          {/* Logo fades in/out */}
-          <div className={`${isCollapsed ? 'opacity-0' : 'opacity-100'}`}>
-            {!isCollapsed && <h2 className="text-transparent bg-clip-text bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-500 text-3xl font-bold select-none">SocialSync</h2>}
-          </div>
-          {/* Toggle button always visible */}
-          <button onClick={toggleSidebar} className="text-white py-2 focus:outline-none">
-            <FaBars size={20} />
-          </button>
-        </div>
-        <nav className="py-5 border-b border-gray-700">
-          <ul>
-            <li
-              className="p-4 flex items-center hover:bg-gray-700 cursor-pointer select-none"
-              onClick={() => setActiveComponent('Dashboard')}
+    <motion.div
+      initial={false}
+      animate={{ width: isCollapsed ? '5rem' : '16rem' }}
+      className={`fixed left-0 h-screen z-30 border-r transition-all duration-200 ${
+        isDarkMode 
+          ? 'bg-gray-800 border-gray-700/50 text-gray-200' 
+          : 'bg-white border-gray-200 text-gray-900'
+      }`}
+    >
+      <div className={`flex items-center justify-between h-16 px-4 border-b transition-colors duration-200 ${
+        isDarkMode ? 'border-gray-700/50' : 'border-gray-200'
+      }`}>
+        <AnimatePresence>
+          {!isCollapsed && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="overflow-hidden"
             >
-              <FaTachometerAlt className="mr-2 ml-2" />
-              <span className={`${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto ml-2'}`}>{!isCollapsed && 'Dashboard'}</span>
-            </li>
-            <li
-              className="p-4 flex items-center hover:bg-gray-700 cursor-pointer select-none"
-              onClick={() => setActiveComponent('Analytics')}
-            >
-              <FaChartBar className="mr-2 ml-2" />
-              <span className={`${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto ml-2'}`}>{!isCollapsed && 'Analytics'}</span>
-            </li>
-            <li
-              className="p-4 flex items-center hover:bg-gray-700 cursor-pointer select-none"
-              onClick={() => setActiveComponent('Audience')}
-            >
-              <FaUsers className="mr-2 ml-2" />
-              <span className={`${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto ml-2'}`}>{!isCollapsed && 'Audience'}</span>
-            </li>
-            <li
-              className="p-4 flex items-center hover:bg-gray-700 cursor-pointer select-none"
-              onClick={() => setActiveComponent('Settings')}
-            >
-              <FaCog className="mr-2 ml-2" />
-              <span className={`${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto ml-2'}`}>{!isCollapsed && 'Settings'}</span>
-            </li>
+              <h2 className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500 text-xl font-bold">
+                SocialSync
+              </h2>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={toggleSidebar}
+          className={`p-2 rounded-lg transition-colors duration-200 ${
+            isDarkMode
+              ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+          }`}
+        >
+          <FaBars size={18} />
+        </motion.button>
+      </div>
+
+      <div className="py-4">
+        <nav>
+          <ul className="space-y-2">
+            {menuItems.map((item) => (
+              <MenuItem
+                key={item.id}
+                icon={item.icon}
+                label={item.label}
+                onClick={() => setActiveComponent(item.id)}
+                isCollapsed={isCollapsed}
+                isActive={activeComponent === item.id}
+              />
+            ))}
           </ul>
         </nav>
-        <div className="py-5 border-b border-gray-700">
-          <h3 className={`px-4 text-lg font-semibold ${isCollapsed ? 'hidden opacity-0 pointer-events-none' : 'block opacity-100'}`}>Connect Social Profiles</h3>
-          <ul className="mt-4">
-            <li
-              className="p-4 flex items-center hover:bg-gray-700 cursor-pointer select-none"
-              onClick={() => setActiveComponent('Instagram')}
-            >
-              <FaInstagram className="mr-2 ml-2 text-pink-500" />
-              <span className={`${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto ml-2'}`}>{!isCollapsed && 'Instagram'}</span>
-            </li>
-            <li
-              className="p-4 flex items-center hover:bg-gray-700 cursor-pointer select-none"
-              onClick={() => setActiveComponent('Facebook')}
-            >
-              <FaFacebook className="mr-2 ml-2 text-blue-500" />
-              <span className={`${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto ml-2'}`}>{!isCollapsed && 'Facebook'}</span>
-            </li>
-            <li
-              className="p-4 flex items-center hover:bg-gray-700 cursor-pointer select-none"
-              onClick={() => setActiveComponent('Twitter')}
-            >
-              <FaTwitter className="mr-2 ml-2 text-blue-400" />
-              <span className={`${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto ml-2'}`}>{!isCollapsed && 'X (Twitter)'}</span>
-            </li>
-            <li
-              className="p-4 flex items-center hover:bg-gray-700 cursor-pointer select-none"
-              onClick={() => setActiveComponent('Youtube')}
-            >
-              <FaYoutube className="mr-2 ml-2 text-red-500" />
-              {!isCollapsed && 'Youtube'}
-            </li>
+
+        <div className="mt-8">
+          <AnimatePresence>
+            {!isCollapsed && (
+              <motion.h3
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className={`px-6 text-xs font-semibold uppercase tracking-wider mb-4 transition-colors duration-200 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}
+              >
+                Social Accounts
+              </motion.h3>
+            )}
+          </AnimatePresence>
+          <ul className="space-y-2">
+            {socialItems.map((item) => (
+              <MenuItem
+                key={item.id}
+                icon={item.icon}
+                label={item.label}
+                onClick={() => setActiveComponent(item.id)}
+                isCollapsed={isCollapsed}
+                isActive={activeComponent === item.id}
+              />
+            ))}
           </ul>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

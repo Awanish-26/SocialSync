@@ -1,18 +1,20 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
+import { useTheme } from './context/ThemeContext';
 
 const AuthLayout = ({ children, imageSrc, imageText, imageDescription }) => {
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
+  const { isDarkMode } = useTheme();
 
   return (
-    <div className="flex items-center justify-center min-h-full">
+    <div className="flex items-center justify-center min-h-screen">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="w-full max-w-4xl mx-4 bg-[#1E293B] rounded-xl shadow-2xl overflow-hidden border border-indigo-500/10"
+        className={`w-full max-w-4xl mx-4  ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'} rounded-xl shadow-2xl overflow-hidden border border-indigo-500/10`}
       >
-        <div className="flex flex-row items-stretch h-[540px] relative">
+        <div className="flex flex-row items-stretch h-[600px] relative">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -46,17 +48,17 @@ const AuthLayout = ({ children, imageSrc, imageText, imageDescription }) => {
                 <img
                   src={imageSrc}
                   alt="Auth illustration"
-                  className="absolute inset-0 w-full h-full object-contain p-6"
+                  className="absolute inset-0 w-full h-full object-contain p-8"
                 />
-                <div className="absolute bottom-6 left-6 right-6 text-white z-10">
-                  <h3 className="text-xl font-bold mb-2">{imageText}</h3>
-                  <p className="text-white/80 text-sm">{imageDescription}</p>
+                <div className="absolute bottom-8 left-8 right-8 text-white z-10">
+                  <h3 className="text-2xl font-bold mb-3">{imageText}</h3>
+                  <p className="text-white/80 text-base leading-relaxed">{imageDescription}</p>
                 </div>
               </motion.div>
 
               {/* Form Section */}
               <motion.div
-                className={`w-full md:w-7/12 p-6 ${
+                className={`w-full md:w-7/12 p-8 flex items-center ${
                   isLoginPage ? "order-first" : "order-last"
                 }`}
                 initial={{ opacity: 0, x: isLoginPage ? 50 : -50 }}
@@ -68,7 +70,9 @@ const AuthLayout = ({ children, imageSrc, imageText, imageDescription }) => {
                   ease: "easeOut"
                 }}
               >
-                {children}
+                <div className="w-full">
+                  {children}
+                </div>
               </motion.div>
             </motion.div>
           </AnimatePresence>
@@ -78,4 +82,4 @@ const AuthLayout = ({ children, imageSrc, imageText, imageDescription }) => {
   );
 };
 
-export default AuthLayout; 
+export default AuthLayout;
