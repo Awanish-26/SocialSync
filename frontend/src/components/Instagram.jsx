@@ -10,7 +10,7 @@ function Instagram() {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const response = await apiClient.get("/instagram/status");
+        const response = await apiClient.get("api/instagram/status");
         setIsConnected(response.data.connected);
       } catch (error) {
         console.error("Error fetching Instagram status:", error);

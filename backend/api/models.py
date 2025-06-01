@@ -4,42 +4,14 @@ from django.utils import timezone
 
 
 class SocialAccount(models.Model):
-    PLATFORM_CHOICES = [
-        ('youtube', 'YouTube'),
-        ('instagram', 'Instagram'),
-        ('x', 'X (Twitter)'),
-    ]
-
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    platform = models.CharField(max_length=20, choices=PLATFORM_CHOICES)
-    connected = models.BooleanField(default=False)
-    channel_id = models.CharField(max_length=255, blank=True, null=True)
+    youtube = models.BooleanField(default=False)
+    twitter = models.BooleanField(default=False)
+    instagram = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user.username}"
-
-
-class YoutubeCredential(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    youtube_username = models.CharField(max_length=255)
-    access_token = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.user.username} - {self.youtube_username}"
-
-
-class YoutubeStats(models.Model):
-    social_account = models.ForeignKey(SocialAccount, on_delete=models.CASCADE)
-    title = models.CharField(max_length=255)
-    subscriber_count = models.IntegerField(default=0)
-    view_count = models.BigIntegerField(default=0)
-    video_count = models.IntegerField(default=0)
-    recorded_at = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return f"YouTube Stats for {self.social_account.user.username}"
 
 
 class TwitterCredential(models.Model):

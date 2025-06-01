@@ -2,7 +2,7 @@ import axios from "axios";
 import { refreshToken } from "./auth";
 
 const apiClient = axios.create({
-    baseURL: "http://localhost:8000/api",
+    baseURL: "http://localhost:8000/",
 });
 
 // Add a request interceptor to refresh the token before every request
