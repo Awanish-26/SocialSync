@@ -5,90 +5,56 @@ import { MetricCard, Button, ChartCard, ConnectYoutube } from "../components"
 
 
 function Youtube() {
-  const [isConnected, setIsConnected] = useState(false);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState([]);
-  const [lateststats, setlatestStats] = useState(null);
-
-  const fetchStatus = async () => {
-    try {
-      const res = await apiClient.get("/youtube/status/");
-      if (res.data.connected) {
-        setIsConnected(true);
-        setData(res.data.data);
-        setlatestStats(res.data.data[res.data.data.length - 1]);
-      } else {
-        setIsConnected(false);
-      }
-    } catch (err) {
-      console.error("Error checking YouTube connection", err);
-    }
-    setLoading(false);
-  };
-
-
-  const refreshStats = async () => {
-    try {
-      await apiClient.post("/youtube/refresh/");
-      fetchStatus();
-    } catch (err) {
-      console.error("Error refreshing stats:", err);
-    }
-  };
 
   useEffect(() => {
-    fetchStatus();
+    apiClient.get("youtube/stats/")
+      .then(res => {
+        setStats(res.data);
+        setLoading(false);
+        console.log(res.data)
+      })
+      .catch(() => setLoading(false));
   }, []);
 
-  // Converts "30-05-2025" to "2025-05-30" and match the format used in data parsing
-  const formatDate = (dateStr) => {
-    const [day, month, year] = dateStr.split("-");
-    return `${year}-${month}-${day}`;
-  };
-
-  const getChartData = (key) =>
-    Array.isArray(data)
-      ? data
-        .filter((item) => typeof item[key] === "number" || !isNaN(Number(item[key])))
-        .map((item) => ({
-          value: Number(item[key]) || 0,
-          date: formatDate(item.last_updated),
-        }
-        ))
-      : [];
   if (loading) return <div className="text-center py-10">Loading...</div>;
 
+  if (!stats) return <ConnectYoutube />;
+
   return (
-    <>
-      {isConnected ? (
-        <div className="p-4 md:p-6 space-y-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900"> {lateststats.title} </h1>
-              <div className="flex items-center mt-2 text-sm text-gray-500">
-                <FiCalendar className="w-4 h-4 mr-1" />
-                <span>Last updated: {new Date(lateststats.last_updated).toLocaleString()}</span>
-              </div>
-            </div>
-            <div className="flex space-x-3 items-center">
-              <Button onClick={refreshStats} className=" right-0 top-0" variant="outline" size="md" icon={<FiRefreshCw className="w-4 h-4" />}>Refresh Data</Button>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <MetricCard title="Subscribers" metric={{ value: lateststats.subscriber_count, change: 0, trend: 'neutral', }} icon={<FiUsers className="text-2xl" />} />
-            <MetricCard title="Views" metric={{ value: lateststats.view_count, change: 0, trend: 'up', }} icon={<FiEye className="text-2xl" />} />
-            <MetricCard title="Videos" metric={{ value: lateststats.video_count, change: 0, trend: 'down', }} icon={<FiVideo className="text-2xl" />} />
-          </div>
-          <div className="mt-6 mb-4 grid grid-cols-2 gap-4">
-            <ChartCard title="Subscribers Growth" data={getChartData("subscriber_count")} color="#3B82F6" timeframe="Last 30 days" height={300} />
-            <ChartCard title="Views Growth" data={getChartData("view_count")} color="#10B981" timeframe="Last 30 days" height={300} />
-            <ChartCard title="Videos Growth" data={getChartData("video_count")} color="#F59E42" timeframe="Last 30 days" height={300} />
-          </div>
-        </div>
-      ) : (
-        <ConnectYoutube />
-      )}
-    </>
+    <div className="p-4 md:p-6 space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">{stats.channel.title}</h1>
+        <p className="text-gray-500">{stats.channel.description}</p>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* <MetricCard title="Subscribers" metric={{ value: stats.channel.subscribers }} icon={<FiUsers className="text-2xl" />} />
+        <MetricCard title="Views" metric={{ value: stats.channel.views }} icon={<FiEye className="text-2xl" />} />
+        <MetricCard title="Videos" metric={{ value: stats.channel.videoCount }} icon={<FiVideo className="text-2xl" />} /> */}
+      </div>
+      <div>
+        <h2 className="text-xl font-semibold mt-6 mb-2">Recent Videos</h2>
+        <ul>
+          {stats.videos.map((v, i) => (
+            <li key={i} className="mb-2">
+              <strong>{v.title}</strong> - {v.views} views, {v.likes} likes, {v.comments} comments
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <Button
+        onClick={() => {
+          apiClient.post("youtube/disconnect/")
+            .then(() => setStats(null));
+        }}
+        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 mt-4"
+      >
+        Disconnect YouTube
+      </Button>
+
+    </div>
   );
 }
 

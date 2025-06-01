@@ -25,7 +25,7 @@ function ConnectTwitterCard() {
     setMessage("");
 
     try {
-      const res = await apiClient.post("/twitter/connect/", formData);
+      const res = await apiClient.post("api/twitter/connect/", formData);
       if (res.status === 200) {
         setMessage("Twitter account connected successfully!");
         setIsConnected(true); // Update state to indicate successful connection

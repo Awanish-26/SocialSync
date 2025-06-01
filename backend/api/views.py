@@ -1,8 +1,6 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .models import SocialAccount, YoutubeStats
-import requests
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework import status
@@ -40,124 +38,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             user = User.objects.get(username=request.data.get('username'))
             response.data['name'] = user.username
         return response
-
-
-# Connect YouTube account and fetch initial stats
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def connect_youtube(request):
-    channel_id = request.data.get("channel_id")
-    api_key = settings.YOUTUBE_API_KEY
-
-    # Fetch channel data from YouTube API
-    url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id={channel_id}&key={api_key}"
-    res = requests.get(url)
-
-    if res.status_code != 200:
-        return Response({"error": "Failed to fetch channel data"}, status=400)
-
-    data = res.json().get("items", [])[0]
-    snippet = data["snippet"]
-    stats = data["statistics"]
-
-    # Create or update SocialAccount and YoutubeStats
-    social_account, created = SocialAccount.objects.update_or_create(
-        user=request.user,
-        platform="youtube",
-        defaults={
-            "connected": True,
-            "channel_id": channel_id,
-        }
-    )
-
-    YoutubeStats.objects.update_or_create(
-        social_account=social_account,
-        defaults={
-            "title": snippet["title"],
-            "subscriber_count": stats["subscriberCount"],
-            "view_count": stats["viewCount"],
-            "video_count": stats["videoCount"],
-        }
-    )
-
-    return Response({"message": "YouTube connected successfully"}, status=200)
-
-
-# Get YouTube connection status and latest stats
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_youtube_status(request):
-    try:
-        account = SocialAccount.objects.get(
-            user=request.user, platform='youtube')
-        if not account.connected:
-            return Response({"connected": False})
-
-        stats = YoutubeStats.objects.filter(
-            social_account=account).order_by('recorded_at')
-
-        if not stats:
-            return Response({"connected": False, "message": "No stats available"})
-
-        data = [
-            {
-                "title": stat.title,
-                "subscriber_count": stat.subscriber_count,
-                "view_count": stat.view_count,
-                "video_count": stat.video_count,
-                "last_updated": stat.recorded_at.strftime("%d-%m-%Y"),
-            }
-            for stat in stats
-        ]
-        return Response({"connected": True, "data": data})
-    except SocialAccount.DoesNotExist:
-        return Response({"connected": False})
-    except Exception as e:
-        return Response({"error": str(e)}, status=400)
-
-
-# Refresh YouTube stats
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def refresh_youtube_stats(request):
-    try:
-        account = SocialAccount.objects.get(
-            user=request.user, platform="youtube")
-        channel_id = account.channel_id
-        api_key = settings.YOUTUBE_API_KEY
-        # Fetch updated stats from YouTube API
-        url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id={channel_id}&key={api_key}"
-        res = requests.get(url)
-        data = res.json().get("items", [])[0]
-        stats = data["statistics"]
-        snippet = data["snippet"]
-        YoutubeStats.objects.create(
-            title=snippet["title"],
-            social_account=account,
-            subscriber_count=int(stats["subscriberCount"]),
-            view_count=int(stats["viewCount"]),
-            video_count=int(stats["videoCount"])
-        )
-
-        return Response({"message": "Stats refreshed successfully!"})
-    except Exception as e:
-        return Response({"error": str(e)}, status=400)
-
-# Disconnect YouTube account
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def disconnect_youtube(request):
-    try:
-        account = SocialAccount.objects.get(
-            user=request.user, platform="youtube")
-        account.delete()  # Delete the YouTube account record
-        return Response({"message": "YouTube account disconnected successfully."})
-    except SocialAccount.DoesNotExist:
-        return Response({"error": "YouTube account not found."}, status=404)
-    except Exception as e:
-        return Response({"error": str(e)}, status=400)
 
 
 # Connect Twitter account

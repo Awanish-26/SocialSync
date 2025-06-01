@@ -11,7 +11,7 @@ function Twitter() {
 
   const fetchStatus = async () => {
     try {
-      const res = await apiClient.get("/twitter/status");
+      const res = await apiClient.get("api/twitter/status");
       setIsConnected(res.data.connected);
       if (res.data.data.length > 0) {
         setStats(res.data.data);
@@ -31,7 +31,7 @@ function Twitter() {
 
   const refreshStats = async () => {
     try {
-      await apiClient.post("/twitter/refresh/");
+      await apiClient.post("api/twitter/refresh/");
       fetchStatus();
     }
     catch (error) {

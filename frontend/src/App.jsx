@@ -10,21 +10,21 @@ function App() {
 
   return (
     <BrowserRouter>
-    <SidebarProvider>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          }
-        />
-      </Routes>
-    </SidebarProvider>
+      <SidebarProvider>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </SidebarProvider>
     </BrowserRouter>
   );
 }

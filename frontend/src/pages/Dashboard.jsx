@@ -12,8 +12,8 @@ function Dashboard() {
 
   // getting the data from connected profiles
   // Fetch real data from backend
-  const yt = useApi('/youtube/status/');
-  const tw = useApi('/twitter/status/');
+  const yt = useApi('youtube/stats/');
+  const tw = useApi('api/twitter/status/');
 
   // Loading and error handling
   if (yt.loading || tw.loading) {
