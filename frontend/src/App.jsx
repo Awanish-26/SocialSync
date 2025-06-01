@@ -11,19 +11,24 @@ function App() {
   return (
     <BrowserRouter>
       <SidebarProvider>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
-        </Routes>
+        <div className="min-h-screen bg-[#0F172A] flex flex-col">
+          <Navbar />
+          <main className="flex-1 mt-5">
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <PrivateRoute>
+                    <Dashboard />
+                  </PrivateRoute>
+                }
+              />
+            </Routes>
+          </main>
+        </div>
       </SidebarProvider>
     </BrowserRouter>
   );
