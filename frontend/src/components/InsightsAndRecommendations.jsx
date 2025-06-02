@@ -1,4 +1,3 @@
-import React from 'react';
 import { FiTrendingUp, FiTrendingDown, FiAlertCircle, FiCheckCircle, FiClock, FiVideo, FiMessageSquare } from 'react-icons/fi';
 import Card from './ui/Card';
 import ChartCard from './charts/ChartCard';
