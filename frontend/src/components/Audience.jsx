@@ -1,10 +1,41 @@
-import React from 'react';
 import { FiUsers, FiMapPin, FiCalendar } from 'react-icons/fi';
 import Card from '../components/ui/Card';
-import { dummyAudience } from '../utils/mockData';
 
 const Audience = () => {
-  const audience = dummyAudience;
+  const audience = {
+    ageDistribution: [
+      { range: '18-24', percent: 25 },
+      { range: '25-34', percent: 35 },
+      { range: '35-44', percent: 20 },
+      { range: '45-54', percent: 15 },
+      { range: '55+', percent: 5 },
+    ],
+    topLocations: [
+      { country: 'United States', percent: 40, img: '/path/to/us-flag.jpg' },
+      { country: 'Canada', percent: 20, img: '/path/to/canada-flag.jpg' },
+      { country: 'United Kingdom', percent: 15, img: '/path/to/uk-flag.jpg' },
+      { country: 'Australia', percent: 10, img: '/path/to/australia-flag.jpg' },
+      { country: 'Others', percent: 15, img: '/path/to/others-flag.jpg' },
+    ],
+    activeTimes: {
+      mostActiveDay: 'Wednesday',
+      peakHours: '2 PM - 4 PM',
+      avgSession: '5 minutes',
+      returnRate: '30%',
+    },
+    interests: [
+      { name: 'Technology', affinity: 70 },
+      { name: 'Sports', affinity: 50 },
+      { name: 'Music', affinity: 60 },
+      { name: 'Travel', affinity: 40 },
+      { name: 'Food', affinity: 55 },
+    ],
+    engagementPatterns: {
+      commentsPerPost: 10,
+      sharesPerPost: 5,
+      saveRate: 25,
+    },
+  };
 
   return (
     <div className="p-4 md:p-6 space-y-6">

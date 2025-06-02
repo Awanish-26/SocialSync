@@ -1,36 +1,30 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './components/context/ThemeContext';
 import { SidebarProvider } from './components/context/SidebarContext';
-import Landing from './pages/Landing';
-import Signup from './pages/Signup';
-import Login from './pages/Login';
+import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
-import PrivateRoute from './components/PrivateRoute';
-import Navbar from './components/Navbar';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import Landing from './pages/Landing';
+import AIAssistant from './components/AIAssistant';
 
 function App() {
   return (
-    <BrowserRouter>
+    <ThemeProvider>
       <SidebarProvider>
-        <div className="min-h-screen bg-[#0F172A] flex flex-col">
-          <Navbar />
-          <main className="flex-1 mt-5">
+        <Router>
+          <Layout>
+            <AIAssistant />
             <Routes>
               <Route path="/" element={<Landing />} />
-              <Route path="/signup" element={<Signup />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/login" element={<Login />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <PrivateRoute>
-                    <Dashboard />
-                  </PrivateRoute>
-                }
-              />
+              <Route path="/signup" element={<Signup />} />
             </Routes>
-          </main>
-        </div>
+          </Layout>
+        </Router>
       </SidebarProvider>
-    </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
