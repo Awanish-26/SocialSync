@@ -26,7 +26,8 @@ GOOGLE_OAUTH2_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_OAUTH2_REDIRECT_URI = 'http://localhost:8000/youtube/callback/'
 GOOGLE_OAUTH2_SCOPES = [
     'https://www.googleapis.com/auth/youtube.force-ssl',
-    # Add other scopes if needed
+    "https://www.googleapis.com/auth/youtube.readonly",
+    "https://www.googleapis.com/auth/yt-analytics.readonly",
 ]
 
 INSTALLED_APPS = [

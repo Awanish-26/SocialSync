@@ -9,8 +9,10 @@ from googleapiclient.discovery import build
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from google_auth_oauthlib.flow import Flow
 import jwt
-
+from api.models import SocialAccount
 from .models import YouTubeCredentials
+from datetime import datetime, timedelta, timezone
+import random
 
 User = get_user_model()
 
@@ -94,7 +96,10 @@ class YouTubeAuthCallbackView(APIView):
         if not user_creds.refresh_token and credentials.refresh_token:
             user_creds.refresh_token = credentials.refresh_token
             user_creds.save()
-
+        social_account, _ = SocialAccount.objects.get_or_create(user=user)
+        if not social_account.youtube:
+            social_account.youtube = True
+            social_account.save()
         # Redirect to a success page on your Vite frontend
         # Pass a query param to indicate success
         frontend_success_url = 'http://localhost:5173/dashboard'
@@ -122,6 +127,7 @@ class YouTubeStatsView(APIView):
         )
 
         youtube = build('youtube', 'v3', credentials=credentials)
+        analytics = build('youtubeAnalytics', 'v2', credentials=credentials)
 
         # Get channel statistics
         channels_response = youtube.channels().list(
@@ -155,6 +161,80 @@ class YouTubeStatsView(APIView):
             "comments": v["statistics"].get("commentCount"),
         } for v in videos_response["items"]]
 
+        # --- REAL TRENDS DATA USING YOUTUBE ANALYTICS API ---
+        today = datetime.now(timezone.utc).date()
+        base_subs = int(stats.get("subscriberCount", 0))
+        base_views = int(stats.get("viewCount", 0))
+        end_date = datetime.now(timezone.utc).date()
+        start_date = end_date - timedelta(days=29)
+
+        # Subscribers trend
+        subs_response = analytics.reports().query(
+            ids='channel==MINE',
+            startDate=start_date.isoformat(),
+            endDate=end_date.isoformat(),
+            metrics='subscribersGained',
+            dimensions='day'
+        ).execute()
+
+        # Views trend
+        views_response = analytics.reports().query(
+            ids='channel==MINE',
+            startDate=start_date.isoformat(),
+            endDate=end_date.isoformat(),
+            metrics='views',
+            dimensions='day'
+        ).execute()
+
+        # Engagement trend (likes + comments)
+        engagement_response = analytics.reports().query(
+            ids='channel==MINE',
+            startDate=start_date.isoformat(),
+            endDate=end_date.isoformat(),
+            metrics='likes,comments',
+            dimensions='day'
+        ).execute()
+        # Helper to parse rows
+
+        def parse_trend(response, metric_index=1):
+            return [
+                {"date": row[0], "value": int(row[metric_index])}
+                for row in response.get("rows", [])
+            ]
+
+        trends = {
+            "subscribers": parse_trend(subs_response),
+            "views": parse_trend(views_response),
+            "engagement": [
+                {
+                    "date": row[0],
+                    "value": int(row[1]) + int(row[2])
+                }
+                for row in engagement_response.get("rows", [])
+            ],
+        }
+
+        for i in range(30):
+            date = today - timedelta(days=29 - i)
+            # Simulate daily growth
+            subs = base_subs + i * 5
+            views = base_views + i * 5
+            # Simulate engagement as likes + comments (random for demo)
+            engagement = random.randint(10, 100)
+
+            trends["subscribers"].append({
+                "date": date.isoformat(),
+                "value": subs
+            })
+            trends["views"].append({
+                "date": date.isoformat(),
+                "value": views
+            })
+            trends["engagement"].append({
+                "date": date.isoformat(),
+                "value": engagement
+            })
+
         return Response({
             "channel": {
                 "title": snippet["title"],
@@ -163,7 +243,8 @@ class YouTubeStatsView(APIView):
                 "videoCount": stats.get("videoCount"),
                 "description": snippet.get("description"),
             },
-            "videos": videos
+            "videos": videos,
+            "trends": trends
         })
 
 
@@ -171,9 +252,12 @@ class YouTubeDisconnectView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        user = request.user
         try:
-            creds = YouTubeCredentials.objects.get(user=request.user)
-            creds.delete()
+            YouTubeCredentials.objects.filter(user=user).delete()
+            account = SocialAccount.objects.get(user=user)
+            account.youtube = False
+            account.save()
             return Response({'message': 'YouTube account disconnected.'}, status=status.HTTP_200_OK)
         except YouTubeCredentials.DoesNotExist:
             return Response({'error': 'No YouTube account connected.'}, status=status.HTTP_400_BAD_REQUEST)

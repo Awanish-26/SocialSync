@@ -7,7 +7,7 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.views import TokenObtainPairView
 import tweepy
-from .models import TwitterCredential, TwitterStats
+from .models import TwitterCredential, TwitterStats, SocialAccount
 
 
 # User signup view
@@ -40,7 +40,26 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         return response
 
 
-# Connect Twitter account
+# Get account status
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_account_status(request):
+    user = request.user
+    try:
+        account = SocialAccount.objects.get(user=user)
+        return Response({
+            'youtube': account.youtube,
+            'twitter': account.twitter,
+            'instagram': account.instagram,
+        })
+    except SocialAccount.DoesNotExist:
+        return Response({
+            'youtube': False,
+            'twitter': False,
+            'instagram': False,
+        })
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def connect_twitter(request):

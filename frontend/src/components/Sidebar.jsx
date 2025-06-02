@@ -7,7 +7,7 @@ const Sidebar = ({ setActiveComponent }) => {
 
   return (
     <div className="flex">
-      <div className={`fixed left-0 h-screen ${isCollapsed ? 'w-16' : 'w-72'} bg-gray-800 text-white z-40 overflow-hidden transition-[width] duration-300 ease-in-out`}>
+      <div className={`fixed left-0 top-0 h-screen ${isCollapsed ? 'w-16' : 'w-72'} bg-gray-800 text-white z-40 overflow-hidden transition-[width] duration-300 ease-in-out`}>
         <div className="py-5 px-6 flex justify-between items-center border-b border-gray-700">
           {/* Logo fades in/out */}
           <div className={`${isCollapsed ? 'opacity-0' : 'opacity-100'}`}>

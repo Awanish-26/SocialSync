@@ -1,38 +1,18 @@
 import { useState, useRef, useContext } from "react";
-import { Sidebar, Navbar, Analytics, Audience, Settings, Instagram, Facebook, Twitter, Youtube, SidebarContext, Button, Card, MetricsGrid, ChartCard, RecommendationCard } from "../components";
+import { Sidebar, Navbar, Analytics, Audience, Settings, Instagram, Facebook, Twitter, Youtube, SidebarContext, Button, Card, ChartCard, RecommendationCard } from "../components";
 import { mockProfiles, getProfileMetrics, getTimeSeriesData, generateRecommendations } from "../utils/mockData";
 import { FiCalendar, FiRefreshCw, FiDownload, FiUsers, FiEye, FiThumbsUp } from 'react-icons/fi';
-import useApi from "../components/useApi";
+// import useApi from "../components/useApi";
 
 function Dashboard() {
   const [activeComponent, setActiveComponent] = useState("Dashboard");
   const sidebarRef = useRef(null);
   const { isCollapsed } = useContext(SidebarContext);
 
+  // Mock API hooks (not used in this mock, but kept for structure)
+  // const getStatus = useApi('api/account_status/');
+  // const yt = useApi('youtube/stats/');
 
-  // getting the data from connected profiles
-  // Fetch real data from backend
-  const yt = useApi('youtube/stats/');
-  const tw = useApi('api/twitter/status/');
-
-  // Loading and error handling
-  if (yt.loading || tw.loading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  }
-  if (yt.error || tw.error) {
-    return <div className="flex justify-center items-center h-screen text-red-500">Error loading data.</div>;
-  }
-
-  // Extract real data
-  const ytData = yt.data?.data || [];
-  const twData = tw.data?.data || [];
-  const latestYt = ytData[ytData.length - 1] || {};
-  const latestTw = twData[twData.length - 1] || {};
-
-  // Example: Calculate total followers if available
-  const totalFollowers = (latestYt.subscriber_count || 0) + (latestTw.followers_count || 0);
-  const totallikes = (latestYt.likes || 0) + (latestTw.likes_count || 0);
-  const totalViews = (latestYt.view_count || 0) + (latestTw.views || 0);
   // Use the first mock profile as the selected profile
   const selectedProfile = mockProfiles[0];
 
@@ -43,6 +23,23 @@ function Dashboard() {
     getTimeSeriesData(selectedProfile.id, 'likes') ||
     getTimeSeriesData(selectedProfile.id, 'views');
   const recommendations = generateRecommendations(selectedProfile.id);
+
+  // Mock YouTube and Twitter stats
+  const latestYt = {
+    subscriber_count: metrics.youtubeFollowers || 1200,
+    likes: metrics.youtubeLikes || 340,
+    view_count: metrics.youtubeViews || 5000,
+  };
+  const latestTw = {
+    followers_count: metrics.twitterFollowers || 800,
+    likes_count: metrics.twitterLikes || 120,
+    views: metrics.twitterViews || 2000,
+  };
+
+  // Totals for cards
+  const totalFollowers = (latestYt.subscriber_count || 0) + (latestTw.followers_count || 0);
+  const totalLikes = (latestYt.likes || 0) + (latestTw.likes_count || 0);
+  const totalViews = (latestYt.view_count || 0) + (latestTw.views || 0);
 
   const renderComponent = () => {
     switch (activeComponent) {
@@ -97,7 +94,7 @@ function Dashboard() {
                 <Card title="Likes">
                   <div className="flex items-center space-x-2">
                     <FiThumbsUp className="text-2xl" />
-                    <span className="text-2xl font-bold">{totallikes}</span>
+                    <span className="text-2xl font-bold">{totalLikes}</span>
                   </div>
                   <div className="text-sm text-gray-500 mt-2">
                     YouTube: {latestYt.likes || 0} | Twitter: {latestTw.likes_count || 0}
