@@ -47,7 +47,7 @@ const accountCardDetails = [
     buttonText: 'Connect LinkedIn',
     description: 'Grow your professional network and analyze your LinkedIn reach.'
   },
-  
+
 ];
 
 // Renders a platform card for connecting social accounts.
@@ -91,11 +91,10 @@ const ConnectAccountCard = ({ platform, icon: Icon, color, buttonText, descripti
     <motion.div
       whileHover={{ scale: 1.03 }}
       whileTap={{ scale: 0.98 }}
-      className={`flex flex-col items-center justify-between h-full ${
-        isDarkMode 
-          ? 'bg-gray-800/70 border-gray-700/70 hover:border-indigo-500/40' 
-          : 'bg-white border-gray-200 hover:border-indigo-500/50 hover:shadow-lg'
-      } p-6 rounded-2xl border transition-all duration-200 shadow-md`}
+      className={`flex flex-col items-center justify-between h-full ${isDarkMode
+        ? 'bg-gray-800/70 border-gray-700/70 hover:border-indigo-500/40'
+        : 'bg-white border-gray-200 hover:border-indigo-500/50 hover:shadow-lg'
+        } p-6 rounded-2xl border transition-all duration-200 shadow-md`}
     >
       <div className={`w-16 h-16 rounded-xl ${color} flex items-center justify-center mb-4 shadow-lg`}>
         <Icon className="w-8 h-8 text-white" />
@@ -166,9 +165,9 @@ function Dashboard() {
     const hasConnectedAccounts = totalFollowers > 0 || totalLikes > 0 || totalViews > 0;
     if (!hasConnectedAccounts) {
       return (
-        <div className={`flex min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} transition-colors duration-200`}> 
+        <div className={`flex min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} transition-colors duration-200`}>
           {/* Sidebar removed if no accounts connected */}
-          <main className={`flex-1 w-full transition-all duration-300 pt-16 px-2 md:px-8`}>  
+          <main className={`flex-1 w-full transition-all duration-300 pt-16 px-2 md:px-8`}>
             <section className="max-w-5xl mx-auto py-8">
               <div className="text-center mb-2">
                 <h1 className={`text-4xl md:text-5xl font-extrabold mb-4 tracking-tight ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Welcome to SocialSync!</h1>
@@ -234,10 +233,10 @@ function Dashboard() {
                 </div>
               </div>
               {/* How SocialSync Helps Section */}
-              <section className={`rounded-2xl shadow-xl p-8 mb-10 flex flex-col md:flex-row items-center gap-8 ${isDarkMode ? 'bg-gradient-to-br from-gray-800 via-indigo-900 to-gray-900 border border-indigo-900' : 'bg-gradient-to-br from-indigo-50 via-white to-indigo-100 border border-indigo-200'}`}> 
+              <section className={`rounded-2xl shadow-xl p-8 mb-10 flex flex-col md:flex-row items-center gap-8 ${isDarkMode ? 'bg-gradient-to-br from-gray-800 via-indigo-900 to-gray-900 border border-indigo-900' : 'bg-gradient-to-br from-indigo-50 via-white to-indigo-100 border border-indigo-200'}`}>
                 <div className="flex-1">
                   <h2 className={`text-2xl md:text-3xl font-bold mb-4 ${isDarkMode ? 'text-indigo-200' : 'text-indigo-700'}`}>How SocialSync Helps You</h2>
-                  <ul className={`list-none space-y-4 text-base md:text-lg font-medium ${isDarkMode ? 'text-indigo-100' : 'text-indigo-900'}`}> 
+                  <ul className={`list-none space-y-4 text-base md:text-lg font-medium ${isDarkMode ? 'text-indigo-100' : 'text-indigo-900'}`}>
                     <li className="flex items-center gap-3"><span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-indigo-500/20"><FiTrendingUp className="text-indigo-500 w-6 h-6" /></span> Unified analytics for all your social media platforms</li>
                     <li className="flex items-center gap-3"><span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-green-500/20"><FiBarChart2 className="text-green-500 w-6 h-6" /></span> Actionable insights and recommendations</li>
                     <li className="flex items-center gap-3"><span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-pink-500/20"><FiActivity className="text-pink-500 w-6 h-6" /></span> Track engagement, followers, and content performance</li>
@@ -260,7 +259,7 @@ function Dashboard() {
                 </motion.div>
               </section>
               {/* Why Connect Section */}
-              <section className={`rounded-2xl shadow-lg p-8 mb-10 flex flex-col md:flex-row items-center gap-8 ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}> 
+              <section className={`rounded-2xl shadow-lg p-8 mb-10 flex flex-col md:flex-row items-center gap-8 ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
                 <div className="flex-1">
                   <h2 className={`text-xl md:text-2xl font-semibold mb-2 ${isDarkMode ? 'text-indigo-200' : 'text-indigo-700'}`}>Why Connect Your Accounts?</h2>
                   <p className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>
@@ -282,7 +281,7 @@ function Dashboard() {
                 </motion.div>
               </section>
               {/* What Can You Do Section */}
-              <section className={`rounded-2xl shadow-lg p-8 mb-10 flex flex-col md:flex-row items-center gap-8 ${isDarkMode ? 'bg-gradient-to-br from-indigo-900 via-gray-900 to-gray-800 border border-indigo-900' : 'bg-gradient-to-br from-indigo-100 via-white to-indigo-50 border border-indigo-200'}`}> 
+              <section className={`rounded-2xl shadow-lg p-8 mb-10 flex flex-col md:flex-row items-center gap-8 ${isDarkMode ? 'bg-gradient-to-br from-indigo-900 via-gray-900 to-gray-800 border border-indigo-900' : 'bg-gradient-to-br from-indigo-100 via-white to-indigo-50 border border-indigo-200'}`}>
                 <div className="flex-1">
                   <h2 className={`text-xl md:text-2xl font-semibold mb-2 ${isDarkMode ? 'text-indigo-200' : 'text-indigo-700'}`}>What Can You Do With SocialSync?</h2>
                   <ul className={`list-disc pl-5 space-y-2 ${isDarkMode ? 'text-indigo-100' : 'text-indigo-900'}`}>
@@ -308,7 +307,7 @@ function Dashboard() {
                 </motion.div>
               </section>
               {/* Key Features Section*/}
-              <section className={`rounded-2xl shadow-lg p-8 mb-10 flex flex-col md:flex-row items-center gap-8 ${isDarkMode ? 'bg-gray-900 border border-indigo-900' : 'bg-white border border-indigo-200'}`}> 
+              <section className={`rounded-2xl shadow-lg p-8 mb-10 flex flex-col md:flex-row items-center gap-8 ${isDarkMode ? 'bg-gray-900 border border-indigo-900' : 'bg-white border border-indigo-200'}`}>
                 <div className="flex-1">
                   <h2 className={`text-xl md:text-2xl font-semibold mb-2 ${isDarkMode ? 'text-indigo-200' : 'text-indigo-700'}`}>Key Features</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
@@ -409,11 +408,10 @@ function Dashboard() {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`px-4 py-2 rounded-lg flex items-center transition-colors ${
-                    isDarkMode
-                      ? 'bg-gray-800 text-gray-200 hover:bg-gray-700'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                  className={`px-4 py-2 rounded-lg flex items-center transition-colors ${isDarkMode
+                    ? 'bg-gray-800 text-gray-200 hover:bg-gray-700'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
                 >
                   <FiRefreshCw className="w-4 h-4 mr-2" />
                   Refresh
@@ -421,11 +419,10 @@ function Dashboard() {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`px-4 py-2 rounded-lg flex items-center transition-colors ${
-                    isDarkMode
-                      ? 'bg-gray-800 text-gray-200 hover:bg-gray-700'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                  className={`px-4 py-2 rounded-lg flex items-center transition-colors ${isDarkMode
+                    ? 'bg-gray-800 text-gray-200 hover:bg-gray-700'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
                 >
                   <FiDownload className="w-4 h-4 mr-2" />
                   Export
@@ -455,11 +452,10 @@ function Dashboard() {
               {/* Twitter Stats */}
               <motion.div
                 whileHover={{ scale: 1.01 }}
-                className={`p-6 rounded-xl border ${
-                  isDarkMode
-                    ? 'bg-gray-800/50 border-gray-700/50'
-                    : 'bg-white border-gray-200'
-                }`}
+                className={`p-6 rounded-xl border ${isDarkMode
+                  ? 'bg-gray-800/50 border-gray-700/50'
+                  : 'bg-white border-gray-200'
+                  }`}
               >
                 <div className="flex items-center gap-3 mb-4">
                   <FaTwitter className="w-6 h-6 text-blue-400" />
@@ -486,11 +482,10 @@ function Dashboard() {
               {/* YouTube Stats */}
               <motion.div
                 whileHover={{ scale: 1.01 }}
-                className={`p-6 rounded-xl border ${
-                  isDarkMode
-                    ? 'bg-gray-800/50 border-gray-700/50'
-                    : 'bg-white border-gray-200'
-                }`}
+                className={`p-6 rounded-xl border ${isDarkMode
+                  ? 'bg-gray-800/50 border-gray-700/50'
+                  : 'bg-white border-gray-200'
+                  }`}
               >
                 <div className="flex items-center gap-3 mb-4">
                   <FaYoutube className="w-6 h-6 text-red-500" />

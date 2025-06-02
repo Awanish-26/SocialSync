@@ -6,16 +6,15 @@ import { useTheme } from './context/ThemeContext';
 
 const MenuItem = ({ icon: Icon, label, onClick, isCollapsed, isActive }) => {
   const { isDarkMode } = useTheme();
-  
+
   return (
     <motion.li
       whileHover={{ x: 5 }}
       whileTap={{ scale: 0.95 }}
-      className={`px-4 py-3 flex items-center cursor-pointer transition-all duration-200 ${
-        isActive 
-          ? `${isDarkMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-50 text-indigo-600'}`
-          : `${isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`
-      } rounded-lg mx-2`}
+      className={`px-4 py-3 flex items-center cursor-pointer transition-all duration-200 ${isActive
+        ? `${isDarkMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-50 text-indigo-600'}`
+        : `${isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`
+        } rounded-lg mx-2`}
       onClick={onClick}
     >
       <Icon className={`w-5 h-5 ${isActive ? (isDarkMode ? 'text-indigo-400' : 'text-indigo-600') : ''}`} />
@@ -57,15 +56,13 @@ const Sidebar = ({ setActiveComponent, activeComponent }) => {
     <motion.div
       initial={false}
       animate={{ width: isCollapsed ? '5rem' : '16rem' }}
-      className={`fixed left-0 h-screen z-30 border-r transition-all duration-200 ${
-        isDarkMode 
-          ? 'bg-gray-800 border-gray-700/50 text-gray-200' 
+      className={`fixed left-0 h-screen z-30 border-r transition-all duration-200 ${isDarkMode
+          ? 'bg-gray-800 border-gray-700/50 text-gray-200'
           : 'bg-white border-gray-200 text-gray-900'
-      }`}
+        }`}
     >
-      <div className={`flex items-center justify-between h-16 px-4 border-b transition-colors duration-200 ${
-        isDarkMode ? 'border-gray-700/50' : 'border-gray-200'
-      }`}>
+      <div className={`flex items-center justify-between h-16 px-4 border-b transition-colors duration-200 ${isDarkMode ? 'border-gray-700/50' : 'border-gray-200'
+        }`}>
         <AnimatePresence>
           {!isCollapsed && (
             <motion.div
@@ -84,11 +81,10 @@ const Sidebar = ({ setActiveComponent, activeComponent }) => {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={toggleSidebar}
-          className={`p-2 rounded-lg transition-colors duration-200 ${
-            isDarkMode
+          className={`p-2 rounded-lg transition-colors duration-200 ${isDarkMode
               ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-          }`}
+            }`}
         >
           <FaBars size={18} />
         </motion.button>
@@ -117,9 +113,8 @@ const Sidebar = ({ setActiveComponent, activeComponent }) => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className={`px-6 text-xs font-semibold uppercase tracking-wider mb-4 transition-colors duration-200 ${
-                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                }`}
+                className={`px-6 text-xs font-semibold uppercase tracking-wider mb-4 transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                  }`}
               >
                 Social Accounts
               </motion.h3>
