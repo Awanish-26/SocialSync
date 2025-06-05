@@ -1,4 +1,6 @@
 # youtube_integration/views.py
+import jwt
+import random
 from django.conf import settings
 from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
@@ -8,11 +10,9 @@ from rest_framework.response import Response
 from googleapiclient.discovery import build
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from google_auth_oauthlib.flow import Flow
-import jwt
 from api.models import SocialAccount
 from .models import YouTubeCredentials
 from datetime import datetime, timedelta, timezone
-import random
 
 User = get_user_model()
 

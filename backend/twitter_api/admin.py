@@ -1,3 +1,7 @@
 from django.contrib import admin
+from .models import TwitterOAuth2Token
 
-# Register your models here.
+
+@admin.register(TwitterOAuth2Token)
+class TwitterOAuth2TokenAdmin(admin.ModelAdmin):
+    pass

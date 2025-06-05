@@ -2,6 +2,7 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 
 def main():

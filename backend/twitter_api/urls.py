@@ -1,7 +1,14 @@
 from django.urls import path
-from . import views
+from .views import (
+    TwitterAuthInitiateView,
+    TwitterAuthCallbackView,
+    TwitterStatsView,
+    TwitterDisconnectView,
+)
 
 urlpatterns = [
-    path('login/', views.twitter_login, name='twitter_login'),
-    path('callback/', views.twitter_callback, name='twitter_callback'),
+    path('initiate/', TwitterAuthInitiateView.as_view(), name='twitter_login'),
+    path('callback/', TwitterAuthCallbackView.as_view(), name='twitter_callback'),
+    path('stats/', TwitterStatsView.as_view(), name='twitter_stats'),
+    path('disconnect/', TwitterDisconnectView.as_view(), name='twitter_disconnect'),
 ]
