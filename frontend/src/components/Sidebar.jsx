@@ -1,6 +1,5 @@
 import { useContext } from 'react';
-import { SidebarContext } from './context/SidebarContext';
-import { FaTachometerAlt, FaChartBar, FaUsers, FaCog, FaInstagram, FaFacebook, FaTwitter, FaBars, FaYoutube } from 'react-icons/fa';
+import { FaTachometerAlt, FaChartBar, FaUsers, FaCog, FaInstagram, FaFacebook, FaTwitter, FaBars, FaYoutube, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from './context/ThemeContext';
 
@@ -34,8 +33,7 @@ const MenuItem = ({ icon: Icon, label, onClick, isCollapsed, isActive }) => {
   );
 };
 
-const Sidebar = ({ setActiveComponent, activeComponent }) => {
-  const { isCollapsed, toggleSidebar } = useContext(SidebarContext);
+const Sidebar = ({ setActiveComponent, activeComponent, isCollapsed, setIsCollapsed }) => {
   const { isDarkMode } = useTheme();
 
   const menuItems = [
@@ -80,10 +78,10 @@ const Sidebar = ({ setActiveComponent, activeComponent }) => {
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          onClick={toggleSidebar}
+          onClick={() => setIsCollapsed((prev) => !prev)}
           className={`p-2 rounded-lg transition-colors duration-200 ${isDarkMode
-              ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              ? 'text-gray-400 hover:text-gray-200 hover:bg-white'
+              : 'text-gray-600 hover:text-gray-200 hover:bg-gray-100'
             }`}
         >
           <FaBars size={18} />
@@ -134,6 +132,20 @@ const Sidebar = ({ setActiveComponent, activeComponent }) => {
           </ul>
         </div>
       </div>
+
+      {/* Collapse/Expand Button on the right border center */}
+      <button
+        onClick={() => setIsCollapsed((prev) => !prev)}
+        className={`absolute top-1/2 right-0 -translate-y-1/2 translate-x-1/2 z-40 rounded-full p-2 border-4 transition-all duration-200 flex items-center justify-center
+  ${isDarkMode
+    ? 'bg-indigo-600 hover:bg-indigo-700 text-white border-gray-800'
+    : 'bg-white hover:bg-gray-100 text-gray-500 border-white'}
+`}
+        style={{ outline: 'none' }}
+        aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+      >
+        {isCollapsed ? <FaChevronRight size={20} /> : <FaChevronLeft size={20} />}
+      </button>
     </motion.div>
   );
 };
