@@ -9,6 +9,8 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 DEBUG = True
+SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SECURE = False
 
 ALLOWED_HOSTS = []
 

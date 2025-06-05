@@ -1,154 +1,80 @@
-import apiClient from "../utils/apiClient";
 import { useEffect, useState } from "react";
-import { FiUsers, FiMessageSquare, FiHeart, FiRefreshCw, FiCalendar } from "react-icons/fi";
-import { ChartCard, Button, MetricCard, ConnectTwitterCard } from "../components";
+import apiClient from "../utils/apiClient";
+import { FaTwitter } from "react-icons/fa";
+import TwitterCard from "./connectCards/TwitterCard";
+import ChartCard from "./charts/ChartCard";
 
 function Twitter() {
-  const [isConnected, setIsConnected] = useState(false);
-  const [Loading, setLoading] = useState(true);
-  const [stats, setStats] = useState([]);
-  const [topStats, setTopStats] = useState(null);
-
-  const fetchStatus = async () => {
-    try {
-      const res = await apiClient.get("api/twitter/status");
-      setIsConnected(res.data.connected);
-      if (res.data.data.length > 0) {
-        setStats(res.data.data);
-        setTopStats(res.data.data[res.data.data.length - 1]);
-      }
-    } catch (error) {
-      console.error("Error fetching Twitter status:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [profile, setProfile] = useState(null);
+  const [tweets, setTweets] = useState([]);
+  const [trends, setTrends] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchStatus();
+    apiClient.get("twitter/stats/")
+      .then(res => {
+        setProfile(res.data.profile);
+        setTweets(res.data.tweets);
+        setTrends(res.data.trends);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
+  if (loading) return <div>Loading Twitter analytics...</div>;
+  if (!profile) return <TwitterCard />;
 
-  const refreshStats = async () => {
-    try {
-      await apiClient.post("api/twitter/refresh/");
-      fetchStatus();
-    }
-    catch (error) {
-      console.error("Error refreshing Twitter stats:", error);
-    }
-  };
-
-  // Format date if needed (assuming stats[].timestamp is ISO or "DD-MM-YYYY")
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    if (dateStr.includes("-") && dateStr.split("-")[0].length === 2) {
-      // "DD-MM-YYYY" to "YYYY-MM-DD"
-      const [day, month, year] = dateStr.split("-");
-      return `${year}-${month}-${day}`;
-    }
-    return dateStr;
-  };
-
-  // Prepare data for ChartCard
-  const getChartData = (key) =>
-    Array.isArray(stats)
-      ? stats
-        .filter((item) => typeof item[key] === "number" || !isNaN(Number(item[key])))
-        .map((item) => ({
-          value: Number(item[key]) || 0,
-          date: formatDate(item.timestamp),
-        }))
-      : [];
-
-  if (!stats) {
-    return <div>Loading...</div>;
-  }
-
-  if (Loading) return <div className="text-center py-10">Loading...</div>;
+  // Prepare data for ChartCard (expects [{date, value}])
+  const toChartData = (key) =>
+    trends.map(t => ({ date: t.date, value: t[key] }));
 
   return (
-    <>
-      {isConnected ? (
-        <div className="p-4 md:p-6 space-y-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Twitter Insights</h1>
-              <div className="flex items-center mt-2 text-sm text-gray-500">
-                <FiCalendar className="w-4 h-4 mr-1" />
-                {topStats && (
-                  <span>Last updated: {topStats.timestamp}</span>
-                )}
+    <div className="max-w-3xl mx-auto p-4">
+      <div className="flex items-center mb-4">
+        <FaTwitter className="text-blue-400 text-3xl mr-2" />
+        <h2 className="text-xl font-bold">Twitter Analytics</h2>
+      </div>
+      <div className="mb-6">
+        <div className="font-semibold">@{profile.username}</div>
+        <div>Followers: {profile.followers_count}</div>
+        <div>Total Tweets: {profile.tweets_count}</div>
+        <div>Account Created: {profile.created_at && profile.created_at.slice(0, 10)}</div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <ChartCard
+          title="Tweets"
+          data={toChartData("tweets")}
+          color="#1DA1F2"
+        />
+        <ChartCard
+          title="Likes"
+          data={toChartData("likes")}
+          color="#F59E42"
+        />
+        <ChartCard
+          title="Views"
+          data={toChartData("views")}
+          color="#10B981"
+        />
+        <ChartCard
+          title="Retweets"
+          data={toChartData("retweets")}
+          color="#6366F1"
+        />
+      </div>
+      <div>
+        <h3 className="font-semibold mb-2">Recent Tweets</h3>
+        <ul className="space-y-2">
+          {tweets.slice(0, 10).map(t => (
+            <li key={t.id} className="border rounded p-2">
+              <div className="text-gray-800">{t.text}</div>
+              <div className="text-xs text-gray-500">
+                {t.created_at.slice(0, 10)} | Likes: {t.public_metrics.like_count} | Retweets: {t.public_metrics.retweet_count}
               </div>
-            </div>
-            <div className="flex items-center relative">
-              <Button onClick={refreshStats} className="" variant="outline" size="md" icon={<FiRefreshCw className="w-4 h-4" />}>
-                Refresh Data
-              </Button>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {topStats ? (
-              <>
-                <MetricCard
-                  title="Followers"
-                  metric={{
-                    value: topStats.followers_count || 0,
-                    change: 0,
-                    trend: 'neutral',
-                  }}
-                  icon={<FiUsers className="text-2xl" />}
-                />
-                <MetricCard
-                  title="Tweets"
-                  metric={{
-                    value: topStats.tweets_count || 0,
-                    change: 0,
-                    trend: 'neutral',
-                  }}
-                  icon={<FiMessageSquare className="text-2xl" />}
-                />
-                <MetricCard
-                  title="Likes"
-                  metric={{
-                    value: topStats.likes_count || 0,
-                    change: 0,
-                    trend: 'neutral',
-                  }}
-                  icon={<FiHeart className="text-2xl" />}
-                />
-              </>
-            ) : (
-              <div>Loading metrics...</div>
-            )}
-          </div>
-          {/* Chart Section */}
-          <div className="mt-6 mb-4 grid grid-cols-2 gap-4">
-            <ChartCard
-              title="Followers Growth"
-              data={getChartData("followers_count")}
-              color="#3B82F6"
-              timeframe="Last 30 days"
-              height={300}
-            />
-            <ChartCard
-              title="Tweets Growth"
-              data={getChartData("tweets_count")}
-              color="#10B981"
-              timeframe="Last 30 days"
-              height={300}
-            />
-            <ChartCard
-              title="Likes Growth"
-              data={getChartData("likes_count")}
-              color="#F59E42"
-              timeframe="Last 30 days"
-              height={300}
-            />
-          </div>
-        </div>
-      ) : <ConnectTwitterCard />}
-    </>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
 
