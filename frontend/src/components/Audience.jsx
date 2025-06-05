@@ -1,7 +1,9 @@
 import { FiUsers, FiMapPin, FiCalendar } from 'react-icons/fi';
 import Card from '../components/ui/Card';
+import { useTheme } from './context/ThemeContext';
 
 const Audience = () => {
+  const { isDarkMode } = useTheme();
   const audience = {
     ageDistribution: [
       { range: '18-24', percent: 25 },
@@ -38,26 +40,26 @@ const Audience = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className={`p-4 md:p-6 space-y-6 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="flex items-center gap-2 mb-4">
-        <FiUsers className="w-5 h-5 text-blue-600" />
-        <h1 className="text-2xl font-bold text-gray-900">Audience Insights</h1>
+        <FiUsers className={`w-5 h-5 ${isDarkMode ? 'text-blue-300' : 'text-blue-600'}`} />
+        <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Audience Insights</h1>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Age Distribution */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium">Age Distribution</h3>
-            <FiUsers className="h-5 w-5 text-gray-400" />
+            <h3 className={`text-lg font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Age Distribution</h3>
+            <FiUsers className={`h-5 w-5 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />
           </div>
           <div className="space-y-4">
             {audience.ageDistribution.map((group, idx) => (
               <div key={idx}>
                 <div className="flex justify-between text-sm">
-                  <span>{group.range}</span>
-                  <span className="font-medium">{group.percent}%</span>
+                  <span className={isDarkMode ? 'text-gray-300' : ''}>{group.range}</span>
+                  <span className={`font-medium ${isDarkMode ? 'text-blue-300' : ''}`}>{group.percent}%</span>
                 </div>
-                <div className="mt-1 h-2 bg-gray-200 rounded-full">
+                <div className={`mt-1 h-2 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full`}>
                   <div className="h-2 bg-blue-500 rounded-full" style={{ width: `${group.percent}%` }}></div>
                 </div>
               </div>
@@ -67,17 +69,17 @@ const Audience = () => {
         {/* Top Locations */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium">Top Locations</h3>
-            <FiMapPin className="h-5 w-5 text-gray-400" />
+            <h3 className={`text-lg font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Top Locations</h3>
+            <FiMapPin className={`h-5 w-5 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />
           </div>
           <div className="space-y-4">
             {audience.topLocations.map((loc, idx) => (
               <div key={idx} className="flex justify-between items-center">
                 <div className="flex items-center">
                   <img src={loc.img} className="w-6 h-6 rounded-full object-cover" />
-                  <span className="ml-2">{loc.country}</span>
+                  <span className={`ml-2 ${isDarkMode ? 'text-gray-200' : ''}`}>{loc.country}</span>
                 </div>
-                <span className="font-medium">{loc.percent}%</span>
+                <span className={`font-medium ${isDarkMode ? 'text-blue-300' : ''}`}>{loc.percent}%</span>
               </div>
             ))}
           </div>
@@ -85,25 +87,25 @@ const Audience = () => {
         {/* Active Times */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium">Active Times</h3>
-            <FiCalendar className="h-5 w-5 text-gray-400" />
+            <h3 className={`text-lg font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Active Times</h3>
+            <FiCalendar className={`h-5 w-5 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />
           </div>
           <div className="space-y-4">
-            <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
-              <span>Most Active Day</span>
-              <span className="font-medium text-blue-600">{audience.activeTimes.mostActiveDay}</span>
+            <div className={`flex justify-between items-center p-2 rounded ${isDarkMode ? 'bg-blue-900' : 'bg-blue-50'}`}>
+              <span className={isDarkMode ? 'text-gray-200' : ''}>Most Active Day</span>
+              <span className={`font-medium ${isDarkMode ? 'text-blue-300' : 'text-blue-600'}`}>{audience.activeTimes.mostActiveDay}</span>
             </div>
-            <div className="flex justify-between items-center p-2 bg-green-50 rounded">
-              <span>Peak Hours</span>
-              <span className="font-medium text-green-600">{audience.activeTimes.peakHours}</span>
+            <div className={`flex justify-between items-center p-2 rounded ${isDarkMode ? 'bg-green-900' : 'bg-green-50'}`}>
+              <span className={isDarkMode ? 'text-gray-200' : ''}>Peak Hours</span>
+              <span className={`font-medium ${isDarkMode ? 'text-green-300' : 'text-green-600'}`}>{audience.activeTimes.peakHours}</span>
             </div>
-            <div className="flex justify-between items-center p-2 bg-purple-50 rounded">
-              <span>Avg. Session</span>
-              <span className="font-medium text-purple-600">{audience.activeTimes.avgSession}</span>
+            <div className={`flex justify-between items-center p-2 rounded ${isDarkMode ? 'bg-purple-900' : 'bg-purple-50'}`}>
+              <span className={isDarkMode ? 'text-gray-200' : ''}>Avg. Session</span>
+              <span className={`font-medium ${isDarkMode ? 'text-purple-300' : 'text-purple-600'}`}>{audience.activeTimes.avgSession}</span>
             </div>
-            <div className="flex justify-between items-center p-2 bg-orange-50 rounded">
-              <span>Return Rate</span>
-              <span className="font-medium text-orange-600">{audience.activeTimes.returnRate}</span>
+            <div className={`flex justify-between items-center p-2 rounded ${isDarkMode ? 'bg-orange-900' : 'bg-orange-50'}`}>
+              <span className={isDarkMode ? 'text-gray-200' : ''}>Return Rate</span>
+              <span className={`font-medium ${isDarkMode ? 'text-orange-300' : 'text-orange-600'}`}>{audience.activeTimes.returnRate}</span>
             </div>
           </div>
         </Card>
@@ -114,9 +116,9 @@ const Audience = () => {
         <Card title="Interests">
           <div className="grid grid-cols-2 gap-4">
             {audience.interests.map((interest, idx) => (
-              <div key={idx} className="p-3 bg-gray-50 rounded-lg">
-                <div className="font-medium text-gray-900">{interest.name}</div>
-                <div className="text-sm text-gray-500">{interest.affinity}% affinity</div>
+              <div key={idx} className={`p-3 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                <div className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{interest.name}</div>
+                <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{interest.affinity}% affinity</div>
               </div>
             ))}
           </div>
@@ -126,24 +128,24 @@ const Audience = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-medium">Comments per Post</div>
-                <div className="text-sm text-gray-500">Average engagement</div>
+                <div className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Comments per Post</div>
+                <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Average engagement</div>
               </div>
-              <div className="text-2xl font-semibold text-blue-600">{audience.engagementPatterns.commentsPerPost}</div>
+              <div className={`text-2xl font-semibold ${isDarkMode ? 'text-blue-300' : 'text-blue-600'}`}>{audience.engagementPatterns.commentsPerPost}</div>
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-medium">Shares per Post</div>
-                <div className="text-sm text-gray-500">Viral coefficient</div>
+                <div className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Shares per Post</div>
+                <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Viral coefficient</div>
               </div>
-              <div className="text-2xl font-semibold text-green-600">{audience.engagementPatterns.sharesPerPost}</div>
+              <div className={`text-2xl font-semibold ${isDarkMode ? 'text-green-300' : 'text-green-600'}`}>{audience.engagementPatterns.sharesPerPost}</div>
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-medium">Save Rate</div>
-                <div className="text-sm text-gray-500">Content relevance</div>
+                <div className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Save Rate</div>
+                <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Content relevance</div>
               </div>
-              <div className="text-2xl font-semibold text-purple-600">{audience.engagementPatterns.saveRate}%</div>
+              <div className={`text-2xl font-semibold ${isDarkMode ? 'text-purple-300' : 'text-purple-600'}`}>{audience.engagementPatterns.saveRate}%</div>
             </div>
           </div>
         </Card>

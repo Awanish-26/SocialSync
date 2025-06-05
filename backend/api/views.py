@@ -169,3 +169,32 @@ def disconnect_twitter(request):
         return Response({"message": "Twitter disconnected."})
     except TwitterCredential.DoesNotExist:
         return Response({"error": "Twitter not connected."}, status=404)
+
+
+# User profile (added by Vishal)
+@api_view(['GET', 'PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    user = request.user
+    if request.method == 'GET':
+        return Response({
+            'name': user.username,
+            'email': user.email,
+        })
+    elif request.method in ['PUT', 'PATCH']:
+        name = request.data.get('name')
+        email = request.data.get('email')
+        updated = False
+        if name is not None and name != user.username:
+            user.username = name
+            updated = True
+        if email is not None and email != user.email:
+            user.email = email
+            updated = True
+        if updated:
+            user.save()
+            return Response({'message': 'Profile updated successfully.', 'name': user.username, 'email': user.email})
+        else:
+            return Response({'message': 'No changes made.'})
+    else:
+        return Response({'error': 'Method not allowed.'}, status=405)

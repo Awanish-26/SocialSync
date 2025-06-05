@@ -7,6 +7,7 @@ from .views import (
     refresh_twitter_stats,
     get_twitter_status,
     get_account_status,
+    user_profile,   # added by vishal
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -15,6 +16,7 @@ urlpatterns = [
     path('login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('account_status/', get_account_status, name='get_account_status'),
+    path('user/profile/', user_profile, name='user_profile'),  # added by Vishal for user profile
     # Twitter endpoints
     path('twitter/connect/', connect_twitter, name='connect_twitter'),
     path('twitter/status/', get_twitter_status, name='get_twitter_status'),

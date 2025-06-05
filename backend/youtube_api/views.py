@@ -1,6 +1,7 @@
 # youtube_integration/views.py
 import jwt
 import random
+import logging
 from django.conf import settings
 from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
@@ -13,8 +14,10 @@ from google_auth_oauthlib.flow import Flow
 from api.models import SocialAccount
 from .models import YouTubeCredentials
 from datetime import datetime, timedelta, timezone
+from rest_framework_simplejwt.tokens import RefreshToken    # added by Vishal
 
 User = get_user_model()
+logger = logging.getLogger(__name__)    # added by Vishal
 
 
 class YouTubeAuthInitiateView(APIView):
@@ -100,9 +103,12 @@ class YouTubeAuthCallbackView(APIView):
         if not social_account.youtube:
             social_account.youtube = True
             social_account.save()
-        # Redirect to a success page on your Vite frontend
-        # Pass a query param to indicate success
-        frontend_success_url = 'http://localhost:5173/dashboard'
+        # Generate JWT tokens for the user (added by Vishal)
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
+        # Redirect to frontend with tokens in query params
+        frontend_success_url = f'http://localhost:5173/dashboard?from=youtube&access={access_token}&refresh={refresh_token}'
         return redirect(frontend_success_url)
 
 
@@ -110,142 +116,152 @@ class YouTubeStatsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        # Log the request details (added by Vishal)
+        logger.info('[YouTubeStatsView] Request received for YouTube stats.')
+        logger.info(f'[YouTubeStatsView] User: {request.user} Authenticated: {request.user.is_authenticated}')
+        logger.info(f'[YouTubeStatsView] Authorization header: {request.META.get("HTTP_AUTHORIZATION")}')
         try:
             creds = YouTubeCredentials.objects.get(user=request.user)
+            # Log the credentials retrieval (added by Vishal)
+            logger.info(f'[YouTubeStatsView] Found YouTube credentials for user {request.user}.')
         except YouTubeCredentials.DoesNotExist:
+            # Log the missing credentials (added by Vishal)
+            logger.warning(f'[YouTubeStatsView] No YouTube credentials for user {request.user}.')
             return Response({'error': 'YouTube not connected'}, status=400)
+        try:
+            # Build credentials object for googleapiclient(added by Vishal)
+            from google.oauth2.credentials import Credentials
+            credentials = Credentials(
+                creds.access_token,
+                refresh_token=creds.refresh_token,
+                token_uri="https://oauth2.googleapis.com/token",
+                client_id=settings.GOOGLE_OAUTH2_CLIENT_ID,
+                client_secret=settings.GOOGLE_OAUTH2_CLIENT_SECRET,
+                scopes=creds.scopes.split()
+            )
+            youtube = build('youtube', 'v3', credentials=credentials)
+            analytics = build('youtubeAnalytics', 'v2', credentials=credentials)
 
-        # Build credentials object for googleapiclient
-        from google.oauth2.credentials import Credentials
-        credentials = Credentials(
-            creds.access_token,
-            refresh_token=creds.refresh_token,
-            token_uri="https://oauth2.googleapis.com/token",
-            client_id=settings.GOOGLE_OAUTH2_CLIENT_ID,
-            client_secret=settings.GOOGLE_OAUTH2_CLIENT_SECRET,
-            scopes=creds.scopes.split()
-        )
+            # Get channel statistics(added by Vishal)
+            channels_response = youtube.channels().list(
+                part="snippet,statistics,contentDetails",
+                mine=True
+            ).execute()
 
-        youtube = build('youtube', 'v3', credentials=credentials)
-        analytics = build('youtubeAnalytics', 'v2', credentials=credentials)
+            channel = channels_response["items"][0] # added by Vishal
+            stats = channel["statistics"]
+            snippet = channel["snippet"]
 
-        # Get channel statistics
-        channels_response = youtube.channels().list(
-            part="snippet,statistics,contentDetails",
-            mine=True
-        ).execute()
+            # Example: Get video analytics (last 5 videos)(added by Vishal)
+            uploads_playlist_id = channel["contentDetails"]["relatedPlaylists"]["uploads"]
+            playlist_response = youtube.playlistItems().list(
+                part="snippet,contentDetails",
+                playlistId=uploads_playlist_id,
+                maxResults=5
+            ).execute()
 
-        channel = channels_response["items"][0]
-        stats = channel["statistics"]
-        snippet = channel["snippet"]
+            video_ids = [item["contentDetails"]["videoId"]  # added by Vishal
+                         for item in playlist_response["items"]]
+            videos_response = youtube.videos().list(
+                part="snippet,statistics",
+                id=",".join(video_ids)
+            ).execute()
 
-        # Example: Get video analytics (last 5 videos)
-        uploads_playlist_id = channel["contentDetails"]["relatedPlaylists"]["uploads"]
-        playlist_response = youtube.playlistItems().list(
-            part="snippet,contentDetails",
-            playlistId=uploads_playlist_id,
-            maxResults=5
-        ).execute()
+            videos = [{ # added by Vishal
+                "title": v["snippet"]["title"],
+                "views": v["statistics"].get("viewCount"),
+                "likes": v["statistics"].get("likeCount"),
+                "comments": v["statistics"].get("commentCount"),
+            } for v in videos_response["items"]]
 
-        video_ids = [item["contentDetails"]["videoId"]
-                     for item in playlist_response["items"]]
-        videos_response = youtube.videos().list(
-            part="snippet,statistics",
-            id=",".join(video_ids)
-        ).execute()
+            # --- REAL TRENDS DATA USING YOUTUBE ANALYTICS API ---(added by Vishal)
+            today = datetime.now(timezone.utc).date()
+            base_subs = int(stats.get("subscriberCount", 0))
+            base_views = int(stats.get("viewCount", 0))
+            end_date = datetime.now(timezone.utc).date()
+            start_date = end_date - timedelta(days=29)
 
-        videos = [{
-            "title": v["snippet"]["title"],
-            "views": v["statistics"].get("viewCount"),
-            "likes": v["statistics"].get("likeCount"),
-            "comments": v["statistics"].get("commentCount"),
-        } for v in videos_response["items"]]
+            # Subscribers trend(added by Vishal)
+            subs_response = analytics.reports().query(
+                ids='channel==MINE',
+                startDate=start_date.isoformat(),
+                endDate=end_date.isoformat(),
+                metrics='subscribersGained',
+                dimensions='day'
+            ).execute()
 
-        # --- REAL TRENDS DATA USING YOUTUBE ANALYTICS API ---
-        today = datetime.now(timezone.utc).date()
-        base_subs = int(stats.get("subscriberCount", 0))
-        base_views = int(stats.get("viewCount", 0))
-        end_date = datetime.now(timezone.utc).date()
-        start_date = end_date - timedelta(days=29)
+            # Views trend(added by Vishal)
+            views_response = analytics.reports().query(
+                ids='channel==MINE',
+                startDate=start_date.isoformat(),
+                endDate=end_date.isoformat(),
+                metrics='views',
+                dimensions='day'
+            ).execute()
 
-        # Subscribers trend
-        subs_response = analytics.reports().query(
-            ids='channel==MINE',
-            startDate=start_date.isoformat(),
-            endDate=end_date.isoformat(),
-            metrics='subscribersGained',
-            dimensions='day'
-        ).execute()
+            # Engagement trend (likes + comments)(added by Vishal)
+            engagement_response = analytics.reports().query(
+                ids='channel==MINE',
+                startDate=start_date.isoformat(),
+                endDate=end_date.isoformat(),
+                metrics='likes,comments',
+                dimensions='day'
+            ).execute()
+            # Helper to parse rows
 
-        # Views trend
-        views_response = analytics.reports().query(
-            ids='channel==MINE',
-            startDate=start_date.isoformat(),
-            endDate=end_date.isoformat(),
-            metrics='views',
-            dimensions='day'
-        ).execute()
+            def parse_trend(response, metric_index=1):# added by Vishal
+                return [
+                    {"date": row[0], "value": int(row[metric_index])}
+                    for row in response.get("rows", [])
+                ]
 
-        # Engagement trend (likes + comments)
-        engagement_response = analytics.reports().query(
-            ids='channel==MINE',
-            startDate=start_date.isoformat(),
-            endDate=end_date.isoformat(),
-            metrics='likes,comments',
-            dimensions='day'
-        ).execute()
-        # Helper to parse rows
+            trends = { # added by Vishal
+                "subscribers": parse_trend(subs_response),
+                "views": parse_trend(views_response),
+                "engagement": [
+                    {
+                        "date": row[0],
+                        "value": int(row[1]) + int(row[2])
+                    }
+                    for row in engagement_response.get("rows", [])
+                ],
+            }
 
-        def parse_trend(response, metric_index=1):
-            return [
-                {"date": row[0], "value": int(row[metric_index])}
-                for row in response.get("rows", [])
-            ]
+            for i in range(30): # Simulate 30 days of data (added by Vishal)
+                date = today - timedelta(days=29 - i)
+                # Simulate daily growth
+                subs = base_subs + i * 5
+                views = base_views + i * 5
+                # Simulate engagement as likes + comments (random for demo)
+                engagement = random.randint(10, 100)
 
-        trends = {
-            "subscribers": parse_trend(subs_response),
-            "views": parse_trend(views_response),
-            "engagement": [
-                {
-                    "date": row[0],
-                    "value": int(row[1]) + int(row[2])
-                }
-                for row in engagement_response.get("rows", [])
-            ],
-        }
+                trends["subscribers"].append({ # added by Vishal
+                    "date": date.isoformat(),
+                    "value": subs
+                })
+                trends["views"].append({
+                    "date": date.isoformat(),
+                    "value": views
+                })
+                trends["engagement"].append({
+                    "date": date.isoformat(),
+                    "value": engagement
+                })
 
-        for i in range(30):
-            date = today - timedelta(days=29 - i)
-            # Simulate daily growth
-            subs = base_subs + i * 5
-            views = base_views + i * 5
-            # Simulate engagement as likes + comments (random for demo)
-            engagement = random.randint(10, 100)
-
-            trends["subscribers"].append({
-                "date": date.isoformat(),
-                "value": subs
+            return Response({ # added by Vishal
+                "channel": {
+                    "title": snippet["title"],
+                    "subscribers": stats.get("subscriberCount"),
+                    "views": stats.get("viewCount"),
+                    "videoCount": stats.get("videoCount"),
+                    "description": snippet.get("description"),
+                },
+                "videos": videos,
+                "trends": trends
             })
-            trends["views"].append({
-                "date": date.isoformat(),
-                "value": views
-            })
-            trends["engagement"].append({
-                "date": date.isoformat(),
-                "value": engagement
-            })
-
-        return Response({
-            "channel": {
-                "title": snippet["title"],
-                "subscribers": stats.get("subscriberCount"),
-                "views": stats.get("viewCount"),
-                "videoCount": stats.get("videoCount"),
-                "description": snippet.get("description"),
-            },
-            "videos": videos,
-            "trends": trends
-        })
+        except Exception as e:
+            logger.error(f'[YouTubeStatsView] Exception during stats fetch: {e}', exc_info=True)
+            return Response({'error': f'Exception: {str(e)}'}, status=500)
 
 
 class YouTubeDisconnectView(APIView):

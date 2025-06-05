@@ -4,6 +4,7 @@ import ChartCard from './charts/ChartCard';
 import LineChart from './charts/LineChart';
 import { motion } from 'framer-motion';
 import { useTheme } from './context/ThemeContext';
+import { useEffect } from 'react';
 
 const OverviewCard = ({ title, value, trend, description, icon: Icon, data }) => {
   const { isDarkMode } = useTheme();
@@ -43,8 +44,20 @@ const OverviewCard = ({ title, value, trend, description, icon: Icon, data }) =>
   );
 };
 
-function Overview({ data }) {
+function Overview({ data, onRequireOnboarding = () => {} }) {
   const { isDarkMode } = useTheme();
+
+  // If onboarding callback is provided, call it if data is missing
+  // Use useEffect to avoid hook order issues
+  useEffect(() => {
+    if (!data && typeof onRequireOnboarding === 'function') {
+      onRequireOnboarding();
+    }
+  }, [data, onRequireOnboarding]);
+
+  if (!data) {
+    return null;
+  }
 
   // --- Use YouTube page logic for Overview ---
   // Assume data.ytData is the same as Youtube.jsx's videos array

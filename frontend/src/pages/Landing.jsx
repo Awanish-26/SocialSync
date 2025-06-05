@@ -41,6 +41,8 @@ function Landing() {
   useEffect(() => {
     const token = localStorage.getItem('access');
     if (token) {
+      // Optionally, fetch account status here and redirect to onboarding if needed
+      // For now, let Dashboard handle onboarding logic
       navigate('/dashboard');
     }
   }, [navigate]);

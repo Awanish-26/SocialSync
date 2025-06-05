@@ -7,6 +7,7 @@ const LineChart = ({
   showAxis = true,
   animated = true,
   className = '',
+  isDarkMode = false,
 }) => {
   const svgRef = useRef(null);
 
@@ -44,6 +45,12 @@ const LineChart = ({
     const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     svgRef.current.appendChild(g);
 
+    // Theme colors
+    const axisColor = isDarkMode ? '#374151' : '#e5e7eb';
+    const gridColor = isDarkMode ? '#1f2937' : '#f3f4f6';
+    const tickColor = isDarkMode ? '#6b7280' : '#9ca3af';
+    const labelColor = isDarkMode ? '#d1d5db' : '#6b7280';
+
     // Create axes if showAxis is true
     if (showAxis) {
       // X axis
@@ -52,7 +59,7 @@ const LineChart = ({
       xAxis.setAttribute('y1', `${margin.top + innerHeight}`);
       xAxis.setAttribute('x2', `${margin.left + innerWidth}`);
       xAxis.setAttribute('y2', `${margin.top + innerHeight}`);
-      xAxis.setAttribute('stroke', '#e5e7eb');
+      xAxis.setAttribute('stroke', axisColor);
       xAxis.setAttribute('stroke-width', '1');
       g.appendChild(xAxis);
 
@@ -68,7 +75,7 @@ const LineChart = ({
           tick.setAttribute('y1', `${margin.top + innerHeight}`);
           tick.setAttribute('x2', `${x}`);
           tick.setAttribute('y2', `${margin.top + innerHeight + 5}`);
-          tick.setAttribute('stroke', '#9ca3af');
+          tick.setAttribute('stroke', tickColor);
           g.appendChild(tick);
 
           const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -76,7 +83,7 @@ const LineChart = ({
           label.setAttribute('y', `${margin.top + innerHeight + 20}`);
           label.setAttribute('text-anchor', 'middle');
           label.setAttribute('font-size', '10');
-          label.setAttribute('fill', '#6b7280');
+          label.setAttribute('fill', labelColor);
           const formattedDate = new Date(data[i].date).toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',
@@ -92,7 +99,7 @@ const LineChart = ({
       yAxis.setAttribute('y1', `${margin.top}`);
       yAxis.setAttribute('x2', `${margin.left}`);
       yAxis.setAttribute('y2', `${margin.top + innerHeight}`);
-      yAxis.setAttribute('stroke', '#e5e7eb');
+      yAxis.setAttribute('stroke', axisColor);
       yAxis.setAttribute('stroke-width', '1');
       g.appendChild(yAxis);
 
@@ -109,7 +116,7 @@ const LineChart = ({
         tick.setAttribute('y1', `${y}`);
         tick.setAttribute('x2', `${margin.left - 5}`);
         tick.setAttribute('y2', `${y}`);
-        tick.setAttribute('stroke', '#9ca3af');
+        tick.setAttribute('stroke', tickColor);
         g.appendChild(tick);
 
         // Horizontal grid line
@@ -118,7 +125,7 @@ const LineChart = ({
         gridLine.setAttribute('y1', `${y}`);
         gridLine.setAttribute('x2', `${margin.left + innerWidth}`);
         gridLine.setAttribute('y2', `${y}`);
-        gridLine.setAttribute('stroke', '#f3f4f6');
+        gridLine.setAttribute('stroke', gridColor);
         gridLine.setAttribute('stroke-width', '1');
         g.appendChild(gridLine);
 
@@ -127,7 +134,7 @@ const LineChart = ({
         label.setAttribute('y', `${y + 3}`);
         label.setAttribute('text-anchor', 'end');
         label.setAttribute('font-size', '10');
-        label.setAttribute('fill', '#6b7280');
+        label.setAttribute('fill', labelColor);
 
         // Format large numbers
         let formattedValue;
@@ -145,7 +152,6 @@ const LineChart = ({
     }
 
     // Create line path
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     let d = '';
 
     data.forEach((item, i) => {
@@ -158,6 +164,7 @@ const LineChart = ({
       }
     });
 
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', d);
     path.setAttribute('fill', 'none');
     path.setAttribute('stroke', color);
@@ -192,7 +199,6 @@ const LineChart = ({
     g.appendChild(path);
 
     // Add area fill below the line
-    const areaPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     let areaD = d;
 
     // Add points to complete the area
@@ -200,6 +206,7 @@ const LineChart = ({
     areaD += ` L ${xScale(xValues[0].getTime())} ${yScale(yMin)}`;
     areaD += ' Z';
 
+    const areaPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     areaPath.setAttribute('d', areaD);
     areaPath.setAttribute('fill', color);
     areaPath.setAttribute('fill-opacity', '0.1');
@@ -228,7 +235,7 @@ const LineChart = ({
       circle.setAttribute('cx', `${x}`);
       circle.setAttribute('cy', `${y}`);
       circle.setAttribute('r', '3');
-      circle.setAttribute('fill', 'white');
+      circle.setAttribute('fill', isDarkMode ? '#111827' : 'white');
       circle.setAttribute('stroke', color);
       circle.setAttribute('stroke-width', '1.5');
 
@@ -248,7 +255,7 @@ const LineChart = ({
       g.appendChild(circle);
     });
 
-  }, [data, color, height, showAxis, animated]);
+  }, [data, color, height, showAxis, animated, isDarkMode]);
 
   return (
     <div className={`w-full overflow-hidden ${className}`}>

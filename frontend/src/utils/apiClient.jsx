@@ -5,15 +5,21 @@ const apiClient = axios.create({
     baseURL: "http://localhost:8000/",
 });
 
-// Add a request interceptor to refresh the token before every request
+// Add a request interceptor to set the access token from localStorage
 apiClient.interceptors.request.use(
     async (config) => {
+        // Use access token from localStorage if available
+        const access = localStorage.getItem("access");
+        if (access) {
+            config.headers["Authorization"] = `Bearer ${access}`;
+            return config;
+        }
+        // If no access token, try to refresh
         try {
-            const newToken = await refreshToken(); // Refresh the token
-            config.headers["Authorization"] = `Bearer ${newToken}`; // Set the new token
+            const newToken = await refreshToken();
+            config.headers["Authorization"] = `Bearer ${newToken}`;
         } catch (err) {
             console.error("Error refreshing token:", err);
-            // If refresh fails, clear tokens and redirect to login
             localStorage.clear();
             window.location.href = "/login";
             throw err;

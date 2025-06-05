@@ -1,6 +1,7 @@
 import { FaRegCalendarAlt } from 'react-icons/fa';
 import Card from '../ui/Card';
 import LineChart from './LineChart';
+import { useTheme } from '../context/ThemeContext';
 
 const ChartCard = ({
   title,
@@ -10,6 +11,8 @@ const ChartCard = ({
   height = 200,
   className = '',
 }) => {
+  const { isDarkMode } = useTheme();
+
   const getLatestValue = () => {
     if (data && data.length > 0) {
       return data[data.length - 1].value;
@@ -44,17 +47,17 @@ const ChartCard = ({
     <Card className={className}>
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="text-lg font-medium text-gray-900">{title}</h3>
-          <div className="flex items-center mt-1 text-sm text-gray-500">
+          <h3 className={`text-lg font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h3>
+          <div className={`flex items-center mt-1 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
             <FaRegCalendarAlt className="w-4 h-4 mr-1" />
             <span>{timeframe}</span>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-semibold text-gray-900">
+          <div className={`text-2xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
             {formatNumber(getLatestValue())}
           </div>
-          <div className={`text-sm ${isPositiveGrowth ? 'text-green-600' : 'text-red-600'}`}>
+          <div className={`text-sm ${isPositiveGrowth ? 'text-green-500' : 'text-red-500'}`}>
             {isPositiveGrowth ? '↑' : '↓'} {Math.abs(growthPercentage).toFixed(1)}%
           </div>
         </div>
@@ -67,6 +70,7 @@ const ChartCard = ({
           height={height} 
           showAxis={true}
           animated={true}
+          isDarkMode={isDarkMode}
         />
       </div>
     </Card>

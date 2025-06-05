@@ -1,5 +1,5 @@
-import { useState, useContext } from "react";
-import { Sidebar, Analytics, Audience, Settings, Instagram, Facebook, Twitter, Youtube, SidebarContext } from "../components";
+import { useState, useEffect } from "react";
+import { Sidebar, Analytics, Audience, Settings, Instagram, Facebook, Twitter, Youtube } from "../components";
 import Overview from "../components/Overview";
 import InsightsAndRecommendations from "../components/InsightsAndRecommendations";
 import { FiCalendar, FiRefreshCw, FiDownload } from 'react-icons/fi';
@@ -8,39 +8,50 @@ import useApi from "../components/useApi";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../components/context/ThemeContext";
 import AIAssistant from '../components/AIAssistant';
-import apiClient from "../utils/apiClient";
+import { useNavigate } from 'react-router-dom';
 import Onboarding from '../components/Onboarding';
 
-
-
 function Dashboard() {
+  // All hooks at the top, before any return
   const { isDarkMode } = useTheme();
-  // Get username from localStorage (set by Navbar)
+  const navigate = useNavigate();
   const username = localStorage.getItem('name') || 'User';
-  const [activeComponent, setActiveComponent] = useState("Dashboard"); // Set default to 'Dashboard'
+  const [activeComponent, setActiveComponent] = useState("Dashboard");
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // Fetch connection status
-  const { data: status, loading: statusLoading } = useApi('/api/get_account_status/');
+  const { data: status, loading: statusLoading } = useApi('/api/account_status/');
+  const { data: yt, loading: ytLoading, error: ytError } = useApi(status?.youtube ? '/youtube/stats' : null);
+  const { data: tw, loading: twLoading, error: twError } = useApi(status?.twitter ? '/twitter/stats' : null);
 
-  // Fetch stats as before
-  const { data: yt, loading: ytLoading, error: ytError } = useApi('/youtube/stats');
-  const { data: tw, loading: twLoading, error: twError } = useApi('/twitter/stats');
-  // TODO: Add LinkedIn API if available
+  // If no accounts are connected, show onboarding, else show dashboard
+  const noAccountsConnected = !status || (!status.youtube && !status.twitter && !status.instagram && !status.facebook && !status.linkedin);
 
-  // Show loading spinner if any API is loading
+  // Store tokens from URL after YouTube OAuth (if present)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('from') === 'youtube') {
+      const access = params.get('access');
+      const refresh = params.get('refresh');
+      if (access && refresh) {
+        localStorage.setItem('access', access);
+        localStorage.setItem('refresh', refresh);
+        // Remove tokens from URL for cleanliness
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, []);
+
+  // Show loading spinner while any API is fetching data
   if (statusLoading || ytLoading || twLoading) {
     return (
       <div className={`flex min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} transition-colors duration-200`}>
         <div className="flex-1 flex items-center justify-center">
-          <span className="text-lg text-gray-500">Loading...</span>
+          <span className="text-lg text-gray-500">Analyzing...</span>
         </div>
       </div>
     );
   }
 
-  // If no accounts are connected, show onboarding
-  const noAccountsConnected = status && !status.youtube && !status.twitter && !status.instagram && !status.facebook && !status.linkedin;
   if (noAccountsConnected) {
     return <Onboarding />;
   }

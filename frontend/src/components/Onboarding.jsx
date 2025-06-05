@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { FaFacebookF, FaInstagram, FaTwitter, FaYoutube, FaLinkedin } from "react-icons/fa";
 import { FiTrendingUp, FiBarChart2, FiActivity, FiUsers, FiDownload, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import apiClient from "../utils/apiClient";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const accountCardDetails = [
   {
@@ -62,7 +62,12 @@ const ConnectAccountCard = ({ platform, icon: Icon, color, buttonText, descripti
         res = await apiClient.post(`${endpoint}/initiate/`);
       }
       if (res.status === 200 && (res.data.authorization_url || res.data.redirect_url)) {
-        window.location.href = res.data.authorization_url || res.data.redirect_url;
+        if (endpoint === 'youtube') {
+          // Redirect in the same window for OAuth
+          window.location.href = res.data.authorization_url || res.data.redirect_url;
+        } else {
+          window.location.href = res.data.authorization_url || res.data.redirect_url;
+        }
       } else {
         alert(`Failed to authenticate with ${platform}. Backend did not return a redirect URL.`);
       }
@@ -111,6 +116,9 @@ const Onboarding = () => {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const visibleCards = 3;
   const totalCards = accountCardDetails.length;
+  // Loading state for post-OAuth check
+  const [checkingYouTube, setCheckingYouTube] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   // Helper to get the visible cards in a loop
   function getVisibleCards() {
@@ -120,8 +128,57 @@ const Onboarding = () => {
     });
   }
 
+  useEffect(() => {
+    // Only check YouTube status after OAuth redirect (not on every mount)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('from') === 'youtube') {
+      // Store tokens if present in URL
+      const access = params.get('access');
+      const refresh = params.get('refresh');
+      if (access && refresh) {
+        localStorage.setItem('access', access);
+        localStorage.setItem('refresh', refresh);
+        console.log('[Onboarding] Stored tokens from URL:', { access, refresh });
+      } else {
+        console.warn('[Onboarding] No tokens found in URL after YouTube OAuth.');
+      }
+      setCheckingYouTube(true);
+      (async () => {
+        try {
+          const statsRes = await apiClient.get('/youtube/stats/');
+          console.log('[Onboarding] YouTube stats after OAuth:', statsRes.status, statsRes.data);
+          if (statsRes.status === 200 && statsRes.data) {
+            console.log('[Onboarding] Redirecting to /dashboard after successful YouTube connection.');
+            window.location.href = '/dashboard';
+          } else {
+            setErrorMsg('Failed to fetch YouTube stats after connecting.');
+            setCheckingYouTube(false);
+          }
+        } catch (err) {
+          setErrorMsg('Error fetching YouTube stats after connecting.');
+          setCheckingYouTube(false);
+          console.log('[Onboarding] YouTube stats error after OAuth:', err);
+        }
+      })();
+    }
+  }, []);
+
   return (
     <main className={`flex-1 w-full transition-all duration-300 pt-16 px-2 md:px-8`}>
+      {checkingYouTube && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8 flex flex-col items-center">
+            <span className="text-2xl font-bold mb-2 text-indigo-600 dark:text-indigo-300">Connecting YouTube...</span>
+            <span className="text-gray-700 dark:text-gray-200 mb-2">Finalizing your account connection. Please wait.</span>
+            <span className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500 mt-2"></span>
+          </div>
+        </div>
+      )}
+      {errorMsg && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-red-100 text-red-800 px-6 py-3 rounded-lg shadow-lg border border-red-300">
+          {errorMsg}
+        </div>
+      )}
       <section className="max-w-5xl mx-auto py-8">
         <div className="text-center mb-2">
           <h1 className={`text-4xl md:text-5xl font-extrabold mb-4 tracking-tight ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Welcome to SocialSync!</h1>
