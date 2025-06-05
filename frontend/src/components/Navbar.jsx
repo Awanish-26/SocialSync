@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FiUser, FiSearch, FiLogOut, FiSun, FiMoon } from 'react-icons/fi';
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { motion, AnimatePresence } from 'framer-motion';
@@ -40,10 +40,10 @@ function Navbar() {
     localStorage.removeItem('access');
     localStorage.removeItem('refresh');
     localStorage.removeItem('name');
-
+    
     // Dispatch custom event to notify other components
     window.dispatchEvent(new Event('authStateChanged'));
-
+    
     setIsAuthenticated(false);
     setShowDropdown(false);
     navigate('/');
@@ -65,10 +65,11 @@ function Navbar() {
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className={`fixed top-0 left-0 right-0 z-50 ${isDarkMode
-          ? 'bg-gray-800/95 border-gray-700/50'
+      className={`fixed top-0 left-0 right-0 z-50 ${
+        isDarkMode 
+          ? 'bg-gray-800/95 border-gray-700/50' 
           : 'bg-white/95 border-gray-200'
-        } backdrop-blur-md border-b transition-colors duration-200`}
+      } backdrop-blur-md border-b transition-colors duration-200`}
     >
       <div className="max-w-full mx-2 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -83,15 +84,17 @@ function Navbar() {
           {isAuthenticated && (
             <div className="flex-1 max-w-2xl mx-8">
               <div className="relative">
-                <FiSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                  }`} />
+                <FiSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`} />
                 <input
                   type="text"
                   placeholder="Search analytics, metrics, or profiles..."
-                  className={`w-full pl-10 pr-4 py-2 ${isDarkMode
-                      ? 'bg-gray-700/50 border-gray-600/50 text-gray-200 placeholder-gray-400'
+                  className={`w-full pl-10 pr-4 py-2 ${
+                    isDarkMode 
+                      ? 'bg-gray-700/50 border-gray-600/50 text-gray-200 placeholder-gray-400' 
                       : 'bg-gray-100 border-gray-200 text-gray-900 placeholder-gray-500'
-                    } border rounded-lg focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all`}
+                  } border rounded-lg focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all`}
                 />
               </div>
             </div>
@@ -109,7 +112,7 @@ function Navbar() {
                   <IoMdNotificationsOutline className="h-6 w-6" />
                   <span className="absolute -top-1 -right-1 w-2 h-2 bg-indigo-500 rounded-full"></span>
                 </motion.button>
-
+                
                 <div className="relative user-menu">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -136,17 +139,19 @@ function Navbar() {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className={`absolute right-0 mt-2 w-48 ${isDarkMode
+                        className={`absolute right-0 mt-2 w-48 ${
+                          isDarkMode
                             ? 'bg-gray-800 border-gray-700/50 text-gray-300'
                             : 'bg-white border-gray-200 text-gray-700'
-                          } rounded-lg shadow-lg border overflow-hidden`}
+                        } rounded-lg shadow-lg border overflow-hidden`}
                       >
                         <button
                           onClick={handleLogout}
-                          className={`flex items-center w-full px-4 py-2 ${isDarkMode
+                          className={`flex items-center w-full px-4 py-2 ${
+                            isDarkMode
                               ? 'hover:bg-gray-700/50'
                               : 'hover:bg-gray-100'
-                            } transition-colors`}
+                          } transition-colors`}
                         >
                           <FiLogOut className="mr-2" />
                           Sign Out
@@ -160,8 +165,9 @@ function Navbar() {
               <div className="flex items-center space-x-4">
                 <Link
                   to="/login"
-                  className={`px-4 py-2 ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'
-                    } transition-colors`}
+                  className={`px-4 py-2 ${
+                    isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'
+                  } transition-colors`}
                 >
                   Login
                 </Link>
@@ -179,10 +185,11 @@ function Navbar() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={toggleTheme}
-              className={`p-2 rounded-full transition-all duration-200 ${isDarkMode
+              className={`p-2 rounded-full transition-all duration-200 ${
+                isDarkMode
                   ? 'text-gray-300 hover:text-yellow-400 hover:bg-gray-700/50'
                   : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-                }`}
+              }`}
               aria-label="Toggle theme"
             >
               {isDarkMode ? (

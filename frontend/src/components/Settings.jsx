@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../utils/apiClient';
 import { FiBell, FiLock, FiUser, FiGlobe, FiSettings } from 'react-icons/fi';
@@ -10,7 +10,6 @@ const Settings = () => {
   const name = localStorage.getItem("name");
   const [isYouTubeConnected, setIsYouTubeConnected] = useState(false);
   const [isTwitterConnected, setIsTwitterConnected] = useState(false);
-  const [isInstgramConnected, setIsInstagramConnected] = useState(false);
   const navigate = useNavigate();
   const tabs = [
     { id: 'profile', name: 'Profile', icon: <FiUser className="w-5 h-5" /> },
@@ -28,17 +27,22 @@ const Settings = () => {
 
   useEffect(() => {
     const fetchStatus = async () => {
-      const res = await apiClient.get("api/account_status/");
-      if (res.status === 200) {
-        setIsYouTubeConnected(res.data.youtube);
-        setIsTwitterConnected(res.data.twitter);
-        setIsInstagramConnected(res.data.instagram);
-      } else {
-        console.error("Failed to fetch account status");
+      try {
+        const res = await apiClient.get("/youtube/status/");
+        setIsYouTubeConnected(res.data.connected);
+      } catch (err) {
+        console.error("Error fetching YouTube status:", err);
+      }
+      try {
+        const res = await apiClient.get("/twitter/status/");
+        setIsTwitterConnected(res.data.connected);
+      } catch (err) {
+        console.error("Error fetching Twitter status:", err);
       }
     };
     fetchStatus();
   }, []);
+
 
   const handleLogout = () => {
     localStorage.clear(); // Clear all local storage items
@@ -254,7 +258,7 @@ const Settings = () => {
             <div className="Social-Media-Integration flex-1 max-w-3xl">
               <div className="mt-4 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-200">
                 {[
-                  { name: 'Instagram', connected: isInstgramConnected },
+                  { name: 'Instagram', connected: false },
                   { name: 'Twitter', connected: isTwitterConnected },
                   { name: 'Facebook', connected: false },
                   { name: 'YouTube', connected: isYouTubeConnected },
