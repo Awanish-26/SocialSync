@@ -10,6 +10,7 @@ const Settings = () => {
   const name = localStorage.getItem("name");
   const [isYouTubeConnected, setIsYouTubeConnected] = useState(false);
   const [isTwitterConnected, setIsTwitterConnected] = useState(false);
+  const [user, setUser] = useState({ name: '', email: '' });
   const navigate = useNavigate();
   const tabs = [
     { id: 'profile', name: 'Profile', icon: <FiUser className="w-5 h-5" /> },
@@ -41,6 +42,17 @@ const Settings = () => {
       }
     };
     fetchStatus();
+
+    // Fetch user details
+    const fetchUser = async () => {
+      try {
+        const res = await apiClient.get('/user/profile/');
+        setUser({ name: res.data.name, email: res.data.email });
+      } catch (err) {
+        console.error('Error fetching user profile:', err);
+      }
+    };
+    fetchUser();
   }, []);
 
 
@@ -71,22 +83,31 @@ const Settings = () => {
     }
   };
 
+  // For editable fields, use value and onChange
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setUser((prev) => ({ ...prev, [name]: value }));
+  };
+
   return (
-    <div className="settings-page" id="settings-page">
-      <h1 className="text-2xl font-bold mb-4">Settings</h1>
-      <div className="user-info mb-4">
-        <p className="text-lg">Welcome, {name}!</p>
+    <div className="settings-page bg-white rounded-2xl shadow-lg p-6 md:p-10 mt-6 mb-8 mx-auto max-w-4xl min-h-[80vh]">
+      <h1 className="text-2xl font-bold mb-6 text-gray-900">Settings</h1>
+      <div className="user-info mb-6">
+        <p className="text-lg text-gray-700">Welcome, {user.name || name}!</p>
+        {user.email && (
+          <p className="text-sm text-gray-500">{user.email}</p>
+        )}
       </div>
 
       {/* Tabs */}
-      <div className="tabs flex space-x-4 border-b mb-4">
+      <div className="tabs flex space-x-4 border-b mb-6 pb-2">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => handleTabClick(tab.id)}
-            className={`px-4 py-2 text-sm font-medium ${activeTab === tab.id
-              ? 'border-b-2 border-blue-500 text-blue-500'
-              : 'text-gray-500 hover:text-blue-500'
+            className={`px-4 py-2 text-sm font-medium transition-colors duration-150 rounded-t-lg focus:outline-none ${activeTab === tab.id
+              ? 'border-b-2 border-blue-500 text-blue-600 bg-blue-50'
+              : 'text-gray-500 hover:text-blue-500 hover:bg-gray-100'
               }`}
           >
             <div className="flex items-center space-x-2">
@@ -96,18 +117,16 @@ const Settings = () => {
           </button>
         ))}
       </div>
-      <div className="flex-1 max-w-3xl">
+      <div className="flex-1 max-w-3xl mx-auto">
         {activeTab === 'profile' && (
           <Card title="Profile Settings">
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Profile Picture</label>
                 <div className="mt-2 flex items-center space-x-4">
-                  <img
-                    src="https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=150"
-                    alt="Profile"
-                    className="h-16 w-16 rounded-full object-cover"
-                  />
+                  <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center">
+                    <FiUser className="h-10 w-10 text-blue-500" />
+                  </div>
                   <Button variant="outline" size="sm">Change Photo</Button>
                 </div>
               </div>
@@ -115,7 +134,9 @@ const Settings = () => {
                 <label className="block text-sm font-medium text-gray-700">Name</label>
                 <input
                   type="text"
-                  defaultValue={currentUser.name}
+                  name="name"
+                  value={user.name}
+                  onChange={handleInputChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2"
                 />
               </div>
@@ -123,7 +144,9 @@ const Settings = () => {
                 <label className="block text-sm font-medium text-gray-700">Email</label>
                 <input
                   type="email"
-                  defaultValue={currentUser.email}
+                  name="email"
+                  value={user.email}
+                  onChange={handleInputChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2"
                 />
               </div>
@@ -131,7 +154,7 @@ const Settings = () => {
                 <label className="block text-sm font-medium text-gray-700">Bio</label>
                 <textarea
                   rows={4}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md p-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   placeholder="Write a few sentences about yourself"
                 ></textarea>
               </div>

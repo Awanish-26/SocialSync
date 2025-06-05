@@ -1,8 +1,8 @@
-import { useState, useRef, useContext } from "react";
+import { useState, useContext } from "react";
 import { Sidebar, Analytics, Audience, Settings, Instagram, Facebook, Twitter, Youtube, SidebarContext } from "../components";
 import Overview from "../components/Overview";
 import InsightsAndRecommendations from "../components/InsightsAndRecommendations";
-import { FiCalendar, FiRefreshCw, FiDownload, FiUsers, FiEye, FiThumbsUp, FiPlus, FiTrendingUp, FiBarChart2, FiActivity, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiCalendar, FiRefreshCw, FiDownload } from 'react-icons/fi';
 import { FaInstagram, FaYoutube, FaTwitter, FaLinkedin, FaFacebookF } from 'react-icons/fa';
 import useApi from "../components/useApi";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,8 +19,6 @@ function Dashboard() {
   const username = localStorage.getItem('name') || 'User';
   const [activeComponent, setActiveComponent] = useState("Dashboard"); // Set default to 'Dashboard'
   const [isCollapsed, setIsCollapsed] = useState(false);
-  // Account filter state
-  const [accountFilter, setAccountFilter] = useState("All"); // 'All', 'YouTube', 'Twitter', 'LinkedIn'
 
   // Fetch connection status
   const { data: status, loading: statusLoading } = useApi('/api/get_account_status/');
@@ -53,45 +51,12 @@ function Dashboard() {
   const latestYt = ytData[ytData.length - 1] || {};
   const latestTw = twData[twData.length - 1] || {};
 
-  // Calculate total metrics based on filter
-  let totalFollowers = 0, totalLikes = 0, totalViews = 0;
-  let filteredYt = ytData, filteredTw = twData;
-  if (accountFilter === "All") {
-    totalFollowers = (latestYt.subscriber_count || 0) + (latestTw.followers_count || 0);
-    totalLikes = (latestYt.likes || 0) + (latestTw.likes_count || 0);
-    totalViews = (latestYt.view_count || 0) + (latestTw.views || 0);
-  } else if (accountFilter === "YouTube") {
-    totalFollowers = latestYt.subscriber_count || 0;
-    totalLikes = latestYt.likes || 0;
-    totalViews = latestYt.view_count || 0;
-    filteredTw = [];
-  } else if (accountFilter === "Twitter") {
-    totalFollowers = latestTw.followers_count || 0;
-    totalLikes = latestTw.likes_count || 0;
-    totalViews = latestTw.views || 0;
-    filteredYt = [];
-  } else if (accountFilter === "LinkedIn") {
-    // TODO: Add LinkedIn stats if available
-    filteredYt = [];
-    filteredTw = [];
-  }
-
   const hasConnectedAccounts = !noAccountsConnected;
-
-  // Account filter options based on connected accounts
-  const filterOptions = [
-    { label: "All", value: "All" },
-    ...(status?.youtube ? [{ label: "YouTube", value: "YouTube" }] : []),
-    ...(status?.instagram ? [{ label: "Instagram", value: "Instagram" }] : []),
-    ...(status?.twitter ? [{ label: "Twitter", value: "Twitter" }] : []),
-    ...(status?.facebook ? [{ label: "Facebook", value: "Facebook" }] : []),
-    ...(status?.linkedin ? [{ label: "LinkedIn", value: "LinkedIn" }] : []),
-  ];
 
   const renderDashboard = () => {
     switch (activeComponent) {
       case "Analytics":
-        return <Analytics accountFilter={accountFilter} ytData={filteredYt} twData={filteredTw} latestYt={latestYt} latestTw={latestTw} />;
+        return <Analytics ytData={ytData} twData={twData} latestYt={latestYt} latestTw={latestTw} />;
       case "Audience":
         return <Audience />;
       case "Settings":
@@ -118,33 +83,8 @@ function Dashboard() {
                   <span>Last updated: {new Date().toLocaleDateString()}</span>
                 </div>
               </div>
-              {/* Account Filter Dropdown */}
-              <select
-                value={accountFilter}
-                onChange={e => setAccountFilter(e.target.value)}
-                className={`px-3 py-1 rounded-lg border ${
-                  isDarkMode
-                    ? 'bg-gray-800 border-gray-700 text-gray-300'
-                    : 'bg-white border-gray-200 text-gray-700'
-                }`}
-                style={{ minWidth: 120 }}
-              >
-                {filterOptions.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
               <div className="flex space-x-3">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`px-4 py-2 rounded-lg flex items-center transition-colors ${isDarkMode
-                    ? 'bg-gray-800 text-gray-200 hover:bg-gray-700'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                >
-                  <FiRefreshCw className="w-4 h-4 mr-2" />
-                  Refresh
-                </motion.button>
+                {/* Removed Refresh Button */}
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -160,18 +100,12 @@ function Dashboard() {
             </div>
 
             {/* Overview Section */}
-            <Overview data={{
-              totalFollowers,
-              totalLikes,
-              totalViews,
-              ytData: filteredYt,
-              twData: filteredTw
-            }} />
+            <Overview data={yt} />
 
             {/* Insights and Recommendations */}
             <InsightsAndRecommendations data={{
-              ytData: filteredYt,
-              twData: filteredTw,
+              ytData,
+              twData,
               latestYt,
               latestTw
             }} />
@@ -179,7 +113,7 @@ function Dashboard() {
             {/* Platform-specific Analysis */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Twitter Stats */}
-              {accountFilter !== "YouTube" && status?.twitter && (
+              {status?.twitter && (
                 <motion.div
                   whileHover={{ scale: 1.01 }}
                   className={`p-6 rounded-xl border ${isDarkMode
@@ -210,7 +144,7 @@ function Dashboard() {
                 </motion.div>
               )}
               {/* YouTube Stats */}
-              {accountFilter !== "Twitter" && status?.youtube && (
+              {status?.youtube && (
                 <motion.div
                   whileHover={{ scale: 1.01 }}
                   className={`p-6 rounded-xl border ${isDarkMode
@@ -246,10 +180,9 @@ function Dashboard() {
     }
   };
 
-  // Calculate transition delay for dashboard margin
   const dashboardTransition = isCollapsed
     ? 'transition-all duration-300 delay-200' // Delay when collapsing
-    : 'transition-all duration-300'; // No delay when expanding
+    : 'transition-all duration-300';
 
   return (
     <div className={`flex min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} transition-colors duration-200`}>

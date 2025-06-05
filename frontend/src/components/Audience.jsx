@@ -11,11 +11,11 @@ const Audience = () => {
       { range: '55+', percent: 5 },
     ],
     topLocations: [
-      { country: 'United States', percent: 40, img: '/path/to/us-flag.jpg' },
-      { country: 'Canada', percent: 20, img: '/path/to/canada-flag.jpg' },
-      { country: 'United Kingdom', percent: 15, img: '/path/to/uk-flag.jpg' },
-      { country: 'Australia', percent: 10, img: '/path/to/australia-flag.jpg' },
-      { country: 'Others', percent: 15, img: '/path/to/others-flag.jpg' },
+      { country: 'Delhi', percent: 30, img: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=facearea&w=64&h=64' },
+      { country: 'Mumbai', percent: 25, img: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=facearea&w=64&h=64' },
+      { country: 'Bangalore', percent: 20, img: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=facearea&w=64&h=64' },
+      { country: 'Hyderabad', percent: 15, img: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=facearea&w=64&h=64' },
+      { country: 'Others', percent: 10, img: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=facearea&w=64&h=64' },
     ],
     activeTimes: {
       mostActiveDay: 'Wednesday',
@@ -74,7 +74,7 @@ const Audience = () => {
             {audience.topLocations.map((loc, idx) => (
               <div key={idx} className="flex justify-between items-center">
                 <div className="flex items-center">
-                  <img src={loc.img} alt={loc.country} className="w-6 h-6 rounded-full object-cover" />
+                  <img src={loc.img} className="w-6 h-6 rounded-full object-cover" />
                   <span className="ml-2">{loc.country}</span>
                 </div>
                 <span className="font-medium">{loc.percent}%</span>

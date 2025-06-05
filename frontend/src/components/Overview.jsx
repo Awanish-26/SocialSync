@@ -46,76 +46,43 @@ const OverviewCard = ({ title, value, trend, description, icon: Icon, data }) =>
 function Overview({ data }) {
   const { isDarkMode } = useTheme();
 
-  // Process data for charts
-  const getChartData = (platform, key) => {
-    const platformData = platform === 'youtube' ? data.ytData : data.twData;
-    if (!platformData || platformData.length === 0) return [];
-    return platformData.map(item => ({
-      date: new Date(item.timestamp || item.last_updated).toISOString(),
-      value: item[key] || 0
-    }));
+  // --- Use YouTube page logic for Overview ---
+  // Assume data.ytData is the same as Youtube.jsx's videos array
+  // For charts, use the same trends as Youtube.jsx if available
+  const channel = data.channel || {};
+  const videos = data.ytData || [];
+  const trends = data.trends || {
+    subscribers: videos.map(v => ({ date: v.timestamp || v.last_updated, value: v.subscriber_count || 0 })),
+    views: videos.map(v => ({ date: v.timestamp || v.last_updated, value: v.view_count || 0 })),
+    engagement: videos.map(v => ({ date: v.timestamp || v.last_updated, value: (v.likes || 0) + (v.comments || 0) + (v.view_count || 0) })),
   };
 
-  // Calculate total engagement trend
-  const calculateTrend = (dataArr, key) => {
-    if (!dataArr || dataArr.length < 2) return null;
-    const first = dataArr[0][key] || 0;
-    const last = dataArr[dataArr.length - 1][key] || 0;
-    return first === 0 ? null : ((last - first) / first * 100).toFixed(1);
-  };
+  // Remove twEngagementTrend usage, use only YouTube trends for cards
+  // If you want to show Twitter stats in the future, add similar logic for Twitter trends
+  const twEngagementTrend = null; // Not used, placeholder to avoid ReferenceError
 
-  // Use real data for trends and content performance
-  const ytEngagementTrend = calculateTrend(data.ytData, 'view_count');
-  const twEngagementTrend = calculateTrend(data.twData, 'likes_count');
-  const audienceGrowthTrend = [calculateTrend(data.ytData, 'subscriber_count'), calculateTrend(data.twData, 'followers_count')]
-    .filter(x => x !== null)
-    .map(Number)
-    .reduce((a, b) => a + b, 0);
-  // Calculate average engagement rate from available data
-  let engagementRates = [];
-  if (data.ytData && data.ytData.length > 0) {
-    engagementRates = engagementRates.concat(data.ytData.map(d => (d.likes || 0) / ((d.view_count || 1)) * 100));
-  }
-  if (data.twData && data.twData.length > 0) {
-    engagementRates = engagementRates.concat(data.twData.map(d => (d.likes_count || 0) / ((d.views || 1)) * 100));
-  }
-  const avgEngagementRate = engagementRates.length > 0 ? (engagementRates.reduce((a, b) => a + b, 0) / engagementRates.length).toFixed(1) : null;
+  // Trend calculations using only YouTube data
+  const ytEngagementTrend = trends.engagement && trends.engagement.length > 1
+    ? ((trends.engagement[trends.engagement.length - 1].value - trends.engagement[0].value) / (trends.engagement[0].value || 1) * 100).toFixed(1)
+    : null;
+  const ytSubscribersTrend = trends.subscribers && trends.subscribers.length > 1
+    ? ((trends.subscribers[trends.subscribers.length - 1].value - trends.subscribers[0].value) / (trends.subscribers[0].value || 1) * 100).toFixed(1)
+    : null;
+  const ytViewsTrend = trends.views && trends.views.length > 1
+    ? ((trends.views[trends.views.length - 1].value - trends.views[0].value) / (trends.views[0].value || 1) * 100).toFixed(1)
+    : null;
 
-  // Platform distribution (dynamic)
-  const totalFollowers = (data.ytData?.[data.ytData.length-1]?.subscriber_count || 0) + (data.twData?.[data.twData.length-1]?.followers_count || 0);
-  const ytPercent = totalFollowers ? Math.round(((data.ytData?.[data.ytData.length-1]?.subscriber_count || 0) / totalFollowers) * 100) : 0;
-  const twPercent = totalFollowers ? Math.round(((data.twData?.[data.twData.length-1]?.followers_count || 0) / totalFollowers) * 100) : 0;
-  const igPercent = 100 - ytPercent - twPercent;
+  // Calculate audience growth trend (subscribers trend)
+  const audienceGrowthTrend = ytSubscribersTrend;
+  // Calculate average engagement rate from YouTube data
+  const avgEngagementRate = trends.engagement && trends.engagement.length > 0
+    ? (
+        trends.engagement.reduce((a, b) => a + (b.value || 0), 0) / trends.engagement.length
+      ).toFixed(1)
+    : null;
 
   // Helper for fallback display
   const displayValue = (val, fallback = 'Not enough data') => (val === null || isNaN(val)) ? fallback : val;
-
-  // For testing: inject dummy data if a query param is set or always for now
-  if (window.location.search.includes('dummy') || true) {
-    // Generate 100 dummy YouTube videos
-    data.ytData = Array.from({ length: 100 }, (_, i) => ({
-      timestamp: new Date(Date.now() - (99 - i) * 24 * 60 * 60 * 1000).toISOString(),
-      last_updated: new Date(Date.now() - (99 - i) * 24 * 60 * 60 * 1000).toISOString(),
-      view_count: 100000 + i * 1000,
-      likes: 40000 + i * 100,
-      subscriber_count: 10000 + i * 50,
-      comments: 2000 + i * 10,
-      title: `video_${i + 1}`
-    }));
-    // Generate 100 dummy Twitter stats
-    data.twData = Array.from({ length: 100 }, (_, i) => ({
-      timestamp: new Date(Date.now() - (99 - i) * 24 * 60 * 60 * 1000).toISOString(),
-      last_updated: new Date(Date.now() - (99 - i) * 24 * 60 * 60 * 1000).toISOString(),
-      followers_count: 5000 + i * 20,
-      likes_count: 20000 + i * 50,
-      views: 80000 + i * 500,
-      comments: 1000 + i * 5,
-      title: `tweet_${i + 1}`
-    }));
-    data.totalFollowers = (data.ytData[data.ytData.length-1].subscriber_count || 0) + (data.twData[data.twData.length-1].followers_count || 0);
-    data.totalLikes = (data.ytData[data.ytData.length-1].likes || 0) + (data.twData[data.twData.length-1].likes_count || 0);
-    data.totalViews = (data.ytData[data.ytData.length-1].view_count || 0) + (data.twData[data.twData.length-1].views || 0);
-  }
 
   return (
     <div className="space-y-6">
@@ -140,16 +107,16 @@ function Overview({ data }) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <OverviewCard
           title="Total Engagement"
-          value={displayValue((data.totalViews + data.totalLikes).toLocaleString(), 'No data')}
-          trend={displayValue(Number(ytEngagementTrend) + Number(twEngagementTrend), '-')}
-          description="Views and likes across platforms"
+          value={displayValue(((channel.views || 0) + (channel.likes || 0)).toLocaleString(), 'No data')}
+          trend={displayValue(Number(ytEngagementTrend), '-')}
+          description="Views and likes across YouTube"
           icon={FiActivity}
         />
         <OverviewCard
           title="Audience Growth"
-          value={displayValue(data.totalFollowers.toLocaleString(), 'No data')}
+          value={displayValue((channel.subscribers || 0).toLocaleString(), 'No data')}
           trend={displayValue(audienceGrowthTrend, '-')}
-          description="Total followers and subscribers"
+          description="Total subscribers"
           icon={FiUsers}
         />
         <OverviewCard
@@ -162,82 +129,56 @@ function Overview({ data }) {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <ChartCard
-          title="Total Followers Growth"
-          data={[
-            ...getChartData('youtube', 'subscriber_count'),
-            ...getChartData('twitter', 'followers_count')
-          ]}
-          color="#6366F1"
+          title="Subscribers Trend"
+          data={Array.isArray(trends.subscribers) ? trends.subscribers : []}
+          color="#3B82F6"
           timeframe="Last 30 days"
-          height={200}
-          emptyMessage="Not enough data to display chart"
+          className="h-full"
         />
         <ChartCard
-          title="Total Engagement"
-          data={[
-            ...getChartData('youtube', 'view_count'),
-            ...getChartData('twitter', 'likes_count')
-          ]}
+          title="Views Trend"
+          data={Array.isArray(trends.views) ? trends.views : []}
           color="#10B981"
           timeframe="Last 30 days"
-          height={200}
-          emptyMessage="Not enough data to display chart"
+          className="h-full"
+        />
+        <ChartCard
+          title="Engagement Trend"
+          data={Array.isArray(trends.engagement) ? trends.engagement : []}
+          color="#F59E42"
+          timeframe="Last 30 days"
+          className="h-full"
         />
       </div>
 
-      <Card className="mt-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-            Platform Distribution
-          </h3>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center">
-              <div className="w-3 h-3 rounded-full bg-pink-500 mr-2"></div>
-              <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Instagram</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-              <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Twitter</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
-              <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>YouTube</span>
-            </div>
-          </div>
+      {/* Recent Videos Section */}
+      {/* <div>
+        <h2 className="text-xl font-semibold mt-6 mb-2">Recent Videos</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {videos.map((v, i) => (
+            <Card key={i} className="flex flex-col h-full">
+              <img
+                src={v.thumbnail || v.thumbnail_url || 'https://img.youtube.com/vi/' + (v.videoId || v.id || '') + '/hqdefault.jpg'}
+                alt={v.title}
+                className="w-full h-40 object-cover rounded-t-lg"
+                onError={e => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/320x180?text=No+Thumbnail'; }}
+              />
+              <div className="flex-1 flex flex-col p-4">
+                <h3 className="font-semibold text-lg mb-1 line-clamp-2">{v.title}</h3>
+                <p className="text-gray-500 text-sm mb-2 line-clamp-2">{v.description}</p>
+                <div className="mt-auto flex flex-wrap gap-2 text-xs text-gray-600">
+                  <span>Views: <b>{v.view_count?.toLocaleString() || v.views?.toLocaleString() || 0}</b></span>
+                  <span>Likes: <b>{v.likes?.toLocaleString() || 0}</b></span>
+                  <span>Comments: <b>{v.comments?.toLocaleString() || 0}</b></span>
+                  <span>Date: {v.timestamp ? new Date(v.timestamp).toLocaleDateString() : ''}</span>
+                </div>
+              </div>
+            </Card>
+          ))}
         </div>
-        <div className="space-y-4">
-          {/* Dynamic platform distribution */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>Twitter</span>
-              <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>{twPercent}%</span>
-            </div>
-            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 overflow-hidden">
-              <motion.div initial={{ width: 0 }} animate={{ width: `${twPercent}%` }} transition={{ duration: 1, ease: "easeOut" }} className="h-full rounded-full bg-blue-500" />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>YouTube</span>
-              <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>{ytPercent}%</span>
-            </div>
-            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 overflow-hidden">
-              <motion.div initial={{ width: 0 }} animate={{ width: `${ytPercent}%` }} transition={{ duration: 1, ease: "easeOut" }} className="h-full rounded-full bg-red-500" />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>Instagram</span>
-              <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>{igPercent}%</span>
-            </div>
-            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 overflow-hidden">
-              <motion.div initial={{ width: 0 }} animate={{ width: `${igPercent}%` }} transition={{ duration: 1, ease: "easeOut" }} className="h-full rounded-full bg-pink-500" />
-            </div>
-          </div>
-        </div>
-      </Card>
+      </div> */}
     </div>
   );
 }

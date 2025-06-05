@@ -11,40 +11,34 @@ const InsightCard = ({ type, title, description, metric, action, chart }) => {
   const getIcon = () => {
     switch (type) {
       case 'positive':
-        return <FiTrendingUp className="w-6 h-6 text-green-500" />;
+        return <FiTrendingUp className="w-7 h-7 text-green-500 bg-green-100 dark:bg-green-900/30 rounded-full p-1.5 shadow" />;
       case 'negative':
-        return <FiTrendingDown className="w-6 h-6 text-red-500" />;
+        return <FiTrendingDown className="w-7 h-7 text-red-500 bg-red-100 dark:bg-red-900/30 rounded-full p-1.5 shadow" />;
       case 'warning':
-        return <FiAlertCircle className="w-6 h-6 text-yellow-500" />;
+        return <FiAlertCircle className="w-7 h-7 text-yellow-500 bg-yellow-100 dark:bg-yellow-900/30 rounded-full p-1.5 shadow" />;
       default:
-        return <FiCheckCircle className="w-6 h-6 text-blue-500" />;
+        return <FiCheckCircle className="w-7 h-7 text-blue-500 bg-blue-100 dark:bg-blue-900/30 rounded-full p-1.5 shadow" />;
     }
   };
 
   return (
     <motion.div
-      whileHover={{ scale: 1.02 }}
-      className={`p-6 rounded-xl border ${
+      whileHover={{ scale: 1.025, boxShadow: '0 8px 32px rgba(0,0,0,0.10)' }}
+      className={`p-7 rounded-2xl border shadow-sm transition-all duration-200 ${
         isDarkMode 
-          ? 'bg-gray-800/50 border-gray-700/50' 
-          : 'bg-white border-gray-200'
-      } transition-colors duration-200`}
+          ? 'bg-gray-800/60 border-gray-700/50' 
+          : 'bg-white border-gray-100'
+      }`}
     >
-      <div className="flex items-start gap-4">
-        <div className={`p-3 rounded-lg ${
-          isDarkMode ? 'bg-gray-700/50' : 'bg-gray-100'
-        }`}>
+      <div className="flex items-start gap-5">
+        <div className="flex-shrink-0 flex items-center justify-center">
           {getIcon()}
         </div>
         <div className="flex-1">
-          <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-            {title}
-          </h3>
-          <p className={`text-sm mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            {description}
-          </p>
+          <h3 className={`text-lg font-bold mb-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h3>
+          <p className={`text-sm mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{description}</p>
           {metric && (
-            <div className={`text-lg font-semibold mb-3 ${
+            <div className={`text-xl font-bold mb-3 tracking-tight ${
               type === 'positive' ? 'text-green-500' :
               type === 'negative' ? 'text-red-500' :
               type === 'warning' ? 'text-yellow-500' :
@@ -69,8 +63,8 @@ const InsightCard = ({ type, title, description, metric, action, chart }) => {
             </div>
           )}
           {action && (
-            <button className={`text-sm font-medium ${
-              isDarkMode ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-700'
+            <button className={`text-sm font-semibold rounded px-3 py-1.5 mt-1 shadow-sm ${
+              isDarkMode ? 'bg-indigo-700/20 text-indigo-300 hover:bg-indigo-700/40' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
             } transition-colors`}>
               {action}
             </button>
@@ -81,58 +75,41 @@ const InsightCard = ({ type, title, description, metric, action, chart }) => {
   );
 };
 
-const RecommendationCard = ({ title, description, priority, icon: Icon, progress }) => {
+const RecommendationCard = ({ title, description, priority, icon: Icon }) => {
   const { isDarkMode } = useTheme();
-  
+  const getPriorityIcon = () => {
+    switch (priority) {
+      case 'High':
+        return <FiAlertCircle className="w-4 h-4 text-red-500 mr-1" />;
+      case 'Medium':
+        return <FiClock className="w-4 h-4 text-yellow-500 mr-1" />;
+      default:
+        return <FiCheckCircle className="w-4 h-4 text-green-500 mr-1" />;
+    }
+  };
   return (
     <motion.div
-      whileHover={{ scale: 1.01 }}
-      className={`p-4 rounded-lg ${
-        isDarkMode ? 'bg-gray-800/50' : 'bg-gray-50'
+      whileHover={{ scale: 1.015, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
+      className={`p-5 rounded-xl border shadow-sm transition-all duration-200 ${
+        isDarkMode ? 'bg-gray-800/50 border-gray-700/30' : 'bg-white border-gray-100'
       }`}
     >
       <div className="flex items-start gap-4">
-        <div className={`p-2 rounded-lg ${
-          isDarkMode ? 'bg-gray-700/30' : 'bg-white'
-        }`}>
+        <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-gray-700/30' : 'bg-gray-50'} flex items-center justify-center`}>
           <Icon className={`w-5 h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
         </div>
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
-            <h3 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              {title}
-            </h3>
-            <span className={`text-sm px-2 py-1 rounded ${
-              priority === 'High'
-                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-            }`}>
-              {priority} Priority
+            <h3 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h3>
+            <span className={`flex items-center text-xs px-2 py-1 rounded font-semibold gap-1 bg-transparent shadow-none
+              ${priority === 'High' ? 'text-red-600 dark:text-red-400' :
+                priority === 'Medium' ? 'text-yellow-600 dark:text-yellow-400' :
+                'text-green-600 dark:text-green-400'}
+            `}>
+              {getPriorityIcon()}{priority} Priority
             </span>
           </div>
-          <p className={`text-sm mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            {description}
-          </p>
-          {progress && (
-            <div className="mt-2">
-              <div className="flex justify-between text-sm mb-1">
-                <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>Progress</span>
-                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>{progress}%</span>
-              </div>
-              <div className="h-1.5 bg-gray-200 rounded-full dark:bg-gray-700 overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
-                  className={`h-full rounded-full ${
-                    progress >= 80 ? 'bg-green-500' :
-                    progress >= 50 ? 'bg-yellow-500' :
-                    'bg-red-500'
-                  }`}
-                />
-              </div>
-            </div>
-          )}
+          <p className={`text-sm mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{description}</p>
         </div>
       </div>
     </motion.div>
@@ -152,13 +129,13 @@ function InsightsAndRecommendations({ data }) {
   };
   
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       {/* Insights Section */}
       <div>
-        <h2 className={`text-xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+        <h2 className={`text-2xl font-semibold mb-6 tracking-tight ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
           Key Insights
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <InsightCard
             type="positive"
             title="Peak Engagement Hours"
@@ -177,10 +154,10 @@ function InsightsAndRecommendations({ data }) {
           />
         </div>
       </div>
-
+      <div className="border-t border-gray-200 dark:border-gray-700 my-8" />
       {/* Recommendations Section */}
       <div>
-        <h2 className={`text-xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+        <h2 className={`text-2xl font-semibold mb-6 tracking-tight ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
           Recommendations
         </h2>
         <Card>
@@ -190,27 +167,23 @@ function InsightsAndRecommendations({ data }) {
               description="Schedule more posts during peak engagement hours (6-8 PM)"
               priority="High"
               icon={FiClock}
-              progress={65}
             />
             <RecommendationCard
               title="Increase Video Content"
               description="Aim for 50% video content in your content mix"
               priority="Medium"
               icon={FiVideo}
-              progress={20}
             />
             <RecommendationCard
               title="Engage with Comments"
               description="Respond to comments within 2 hours to boost engagement"
               priority="High"
               icon={FiMessageSquare}
-              progress={85}
             />
           </div>
         </Card>
-
         {/* Performance Trends */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
           <ChartCard
             title="Engagement by Time of Day"
             data={getChartData('twitter', 'likes_count')}
